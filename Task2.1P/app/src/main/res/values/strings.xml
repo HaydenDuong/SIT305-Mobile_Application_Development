@@ -1,0 +1,41 @@
+<resources>
+    <string name="app_name">Unit Converter App</string>
+    <string name="input_field">Enter a value</string>
+    <string name="button_text">Convert</string>
+    <string name="output_field">Result</string>
+
+    <string-array name="conversion_types">
+        <item>Length</item>
+        <item>Weight</item>
+        <item>Temperature</item>
+    </string-array>
+
+    <string-array name="length_source_unit">
+        <item>Inch</item>
+        <item>Foot</item>
+        <item>Yard</item>
+        <item>Mile</item>
+    </string-array>
+
+    <string-array name="length_destination_unit">
+        <item>Centimeter (cm)</item>
+        <item>Kilometer (km)</item>
+    </string-array>
+
+    <string-array name="weight_source_unit">
+        <item>Pound</item>
+        <item>Ounce</item>
+        <item>Ton</item>
+    </string-array>
+
+    <string-array name="weight_destination_unit">
+        <item>Kilogram (kg)</item>
+        <item>Gram (g)</item>
+    </string-array>
+
+    <string-array name="temperature_drop_menu">
+        <item>Celsius</item>
+        <item>Fahrenheit</item>
+        <item>Kelvin</item>
+    </string-array>
+</resources>
