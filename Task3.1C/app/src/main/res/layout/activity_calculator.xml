@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CalculatorActivity">
+
+    <TextView
+        android:id="@+id/calculatorName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Calculator Application"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.049" />
+
+    <!-- ViewGroup7: A LinearLayout with Horizontal Orientation
+    that composes: inputTextA, inputFieldA-->
+    <LinearLayout
+        android:id="@+id/ViewGroup7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="50dp"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/calculatorName">
+
+        <TextView
+            android:id="@+id/inputTextA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Value A"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:layout_weight="0.5"/>
+
+        <EditText
+            android:id="@+id/inputFieldA"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:layout_weight="1.5"
+            android:inputType="numberDecimal"/>
+    </LinearLayout>
+
+    <!-- ViewGroup8: A LinearLayout with Horizontal Orientation
+    that composes: inputTextB, inputFieldB-->
+    <LinearLayout
+        android:id="@+id/ViewGroup8"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ViewGroup7">
+
+        <TextView
+            android:id="@+id/inputTextB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Value B"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:layout_weight="0.5"/>
+
+        <EditText
+            android:id="@+id/inputFieldB"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:drawable/edit_text"
+            android:layout_weight="1.5"
+            android:inputType="numberDecimal"/>
+    </LinearLayout>
+
+    <!-- ViewGroup9: A LinearLayout with Horizontal Orientation
+    that composes of: 2 buttons: '+' & '-' -->
+    <LinearLayout
+        android:id="@+id/ViewGroup9"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ViewGroup8">
+
+        <Button
+            android:id="@+id/plusButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:backgroundTint="#2196F3"
+            android:text="+"
+            android:textSize="15sp"
+            android:textStyle="bold">
+        </Button>
+
+        <Button
+            android:id="@+id/minusButton"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
+            android:layout_weight="1"
+            android:backgroundTint="#2196F3"
+            android:text="-"
+            android:textSize="15sp"
+            android:textStyle="bold">
+        </Button>
+    </LinearLayout>
+
+    <!-- ViewGroup: A LinearLayout with Vertical Orientation
+    that composes of: resultText,displayResultText -->
+    <LinearLayout
+        android:id="@+id/ViewGroup10"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginTop="40dp"
+        android:layout_marginRight="20dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ViewGroup9">
+
+        <TextView
+            android:id="@+id/resultText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Here is the result:"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/resultDisplayText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="result"
+            android:textAlignment="center"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:paddingTop="20dp"/>
+
+        <Button
+            android:id="@+id/returnToMainButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Return to Main Page"
+            android:textAlignment="center"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:layout_weight="1"
+            android:layout_marginTop="200dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"
+            android:backgroundTint="#2196F3"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
