@@ -34,9 +34,8 @@ public class CalculatorActivity extends AppCompatActivity {
 
         // Event-handling for plus button
         plusButton.setOnClickListener(v -> {
-
-            minusButton.setBackgroundColor(Color.parseColor("#2196F3"));
             plusButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_orange_light));
+            minusButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2196F3")));
 
             // Extract values from two input fields (A & B)
             String inputA = inputFieldA.getText().toString().trim();
@@ -58,8 +57,8 @@ public class CalculatorActivity extends AppCompatActivity {
         // Event-handling for minus button
         minusButton.setOnClickListener(v -> {
 
-            plusButton.setBackgroundColor(Color.parseColor("#2196F3"));
             minusButton.setBackgroundTintList(getResources().getColorStateList(android.R.color.holo_orange_light));
+            plusButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#2196F3")));
 
             // Extract values from two input fields (A & B)
             String inputA = inputFieldA.getText().toString().trim();

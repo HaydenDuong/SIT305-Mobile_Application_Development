@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".QuizActivity">
+
+    <TextView
+        android:id="@+id/welcomeUserName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="10dp"
+        android:text="Welcome ..."
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <!-- ViewGroup2: A LinearLayout with Horizontal Orientation
+    composes of TextView for displaying the current progress & Progressive Bar -->
+    <LinearLayout
+        android:id="@+id/ViewGroup2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="horizontal"
+        android:layout_weight="1"
+        android:paddingTop="20dp"
+        app:layout_constraintTop_toBottomOf="@id/welcomeUserName"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/currentQuestionNumber"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:text="1/5"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textAlignment="center"/>
+
+        <ProgressBar
+            android:id="@+id/progessBar"
+            style="@android:style/Widget.ProgressBar.Horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1.5"/>
+    </LinearLayout>
+
+    <!-- ViewGroup3: A LinearLayout with Vertical Orientation
+    composes of questionTitle & questionDetail -->
+    <LinearLayout
+        android:id="@+id/ViewGroup3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:paddingTop="40dp"
+        app:layout_constraintTop_toBottomOf="@id/ViewGroup2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <TextView
+            android:id="@+id/questionTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Question Title"
+            android:textStyle="bold"
+            android:textSize="20sp" />
+
+        <TextView
+            android:id="@+id/questionText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Something will be put here"
+            android:textSize="15sp"
+            android:paddingTop="20dp"/>
+    </LinearLayout>
+
+    <!-- ViewGroup4: A LinearLayout with Vertical Orientation
+    composes of 4 buttons: 3 Answer Buttons & 1 Submit/Next Button
+    Note: @android:drawable/btn_default will allow the button to be able to change color when pressed -->
+    <LinearLayout
+        android:id="@+id/ViewGroup4"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:paddingTop="40dp"
+        app:layout_constraintTop_toBottomOf="@id/ViewGroup3"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <Button
+            android:id="@+id/answer1Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Answer 1"
+            android:textStyle="bold"
+            android:textColor="#FE020202"
+            android:background="@android:drawable/btn_default"
+            android:layout_weight="1"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"/>
+
+        <Button
+            android:id="@+id/answer2Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Answer 2"
+            android:textStyle="bold"
+            android:textColor="#FE020202"
+            android:background="@android:drawable/btn_default"
+            android:layout_weight="1"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"/>
+
+        <Button
+            android:id="@+id/answer3Button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Answer 3"
+            android:textStyle="bold"
+            android:textColor="#FE020202"
+            android:background="@android:drawable/btn_default"
+            android:layout_weight="1"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"/>
+
+        <Button
+            android:id="@+id/submitButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:layout_weight="1"
+            android:backgroundTint="@color/material_dynamic_secondary50"
+            android:text="Submit"
+            android:textColor="#FE020202"
+            android:textStyle="bold"
+            android:layout_marginLeft="40dp"
+            android:layout_marginRight="40dp"/>
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
