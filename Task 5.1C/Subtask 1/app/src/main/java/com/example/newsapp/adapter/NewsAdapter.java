@@ -15,9 +15,18 @@ import java.util.List;
 public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder> {
 
     private List<News> newsList;
+    private OnNewsClickListener onNewsClickListener;
 
     public NewsAdapter(List<News> newsList) {
         this.newsList = newsList;
+    }
+
+    public interface OnNewsClickListener {
+        void onNewsClick(News news);
+    }
+
+    public void setOnNewsClickListener(OnNewsClickListener listener) {
+        this.onNewsClickListener = listener;
     }
 
     @NonNull
@@ -38,6 +47,11 @@ public class NewsAdapter extends RecyclerView.Adapter<NewsAdapter.NewsViewHolder
         holder.newsImage.setImageResource(news.getImageResId());
         holder.newsTitle.setText(news.getTitle());
         holder.newsInfo.setText(news.getDescription());
+        holder.itemView.setOnClickListener(v -> {
+            if (onNewsClickListener != null) {
+                onNewsClickListener.onNewsClick(news);
+            }
+        });
     }
 
     @Override

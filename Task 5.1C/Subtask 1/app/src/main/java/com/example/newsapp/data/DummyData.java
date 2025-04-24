@@ -18,4 +18,26 @@ public class DummyData {
             new News(5, R.drawable.news5, "title 5", "description 5"),
             new News(6, R.drawable.news6, "title 6", "description 6")
     );
+
+    static {
+        // Related News for TOP_STORIES
+        TOP_STORIES.get(0).getRelatedNews().add(TOP_STORIES.get(1));
+        TOP_STORIES.get(0).getRelatedNews().add(TOP_STORIES.get(2));
+
+        TOP_STORIES.get(1).getRelatedNews().add(TOP_STORIES.get(2));
+        TOP_STORIES.get(1).getRelatedNews().add(NEWS_LIST.get(0));
+
+        TOP_STORIES.get(2).getRelatedNews().add(TOP_STORIES.get(0));
+        TOP_STORIES.get(2).getRelatedNews().add(NEWS_LIST.get(1));
+
+        // Related News for NEWS_LIST
+        NEWS_LIST.get(0).getRelatedNews().add(NEWS_LIST.get(1));
+        NEWS_LIST.get(0).getRelatedNews().add(NEWS_LIST.get(2));
+
+        NEWS_LIST.get(1).getRelatedNews().add(NEWS_LIST.get(2));
+        NEWS_LIST.get(1).getRelatedNews().add(TOP_STORIES.get(0));
+
+        NEWS_LIST.get(2).getRelatedNews().add(NEWS_LIST.get(0));
+        NEWS_LIST.get(2).getRelatedNews().add(TOP_STORIES.get(1));
+    }
 }

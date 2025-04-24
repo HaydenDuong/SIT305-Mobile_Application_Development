@@ -16,9 +16,18 @@ import java.util.List;
 public class TopStoriesAdapter extends RecyclerView.Adapter<TopStoriesAdapter.TopStoriesViewHolder> {
 
     private List<News> topStoriesList;
+    private OnTopStoriesClickListener onTopStoriesClickListener;
 
     public TopStoriesAdapter(List<News> topStoriesList) {
         this.topStoriesList = topStoriesList;
+    }
+
+    public interface OnTopStoriesClickListener {
+        void onTopStoriesClick(News news);
+    }
+
+    public void setOnTopStoriesClickListener(OnTopStoriesClickListener listener) {
+        this.onTopStoriesClickListener = listener;
     }
 
     @NonNull
@@ -38,6 +47,11 @@ public class TopStoriesAdapter extends RecyclerView.Adapter<TopStoriesAdapter.To
 
         holder.topStoriesImage.setImageResource(topStory.getImageResId());
         holder.topStoriesTitle.setText(topStory.getTitle());
+        holder.itemView.setOnClickListener(v -> {
+            if (onTopStoriesClickListener != null) {
+                onTopStoriesClickListener.onTopStoriesClick(topStory);
+            }
+        });
     }
 
     @Override
