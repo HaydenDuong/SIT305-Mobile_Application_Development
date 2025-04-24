@@ -4,14 +4,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.taskmanager.R;
 import com.example.taskmanager.TaskManager;
-import com.example.taskmanager.database.AppDatabase;
 import com.example.taskmanager.models.Task;
 
 import java.text.SimpleDateFormat;
