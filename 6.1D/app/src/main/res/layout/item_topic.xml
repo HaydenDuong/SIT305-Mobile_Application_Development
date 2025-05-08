@@ -8,6 +8,8 @@
         android:id="@+id/toggle_topic"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@drawable/topic_toggle_selector"
+        android:textColor="@color/topic_text_color"
         android:textOff="Topic"
         android:textOn="Topic" />
 

@@ -30,9 +30,9 @@ import java.util.concurrent.Executors;
 
 public class LoginFragment extends Fragment {
 
-    private EditText etUsernameLogin, etPasswordLogin; // Renamed to avoid conflict if IDs are same as signup
+    private EditText etUsernameLogin, etPasswordLogin;
     private Button btnLogin;
-    private TextView tvSignUpPrompt; // Renamed for clarity
+    private TextView tvSignUpPrompt;
     private UserDao userDao;
     private UserTopicDao userTopicDao;
     private ExecutorService executorService;
@@ -53,32 +53,20 @@ public class LoginFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_login, container, false); // Ensure this layout name
+        View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        // Assuming these IDs in fragment_login.xml
-        etUsernameLogin = view.findViewById(R.id.et_username); // Or e.g., R.id.et_login_username
-        etPasswordLogin = view.findViewById(R.id.et_password); // Or e.g., R.id.et_login_password
+        etUsernameLogin = view.findViewById(R.id.et_username);
+        etPasswordLogin = view.findViewById(R.id.et_password);
         btnLogin = view.findViewById(R.id.btn_login);
-        tvSignUpPrompt = view.findViewById(R.id.tv_sign_up); // Or e.g., R.id.tv_navigate_signup
-
-        // Auto-login check
-        checkIfUserIsLoggedIn();
-
+        tvSignUpPrompt = view.findViewById(R.id.tv_sign_up);
 
         btnLogin.setOnClickListener(v -> attemptLogin());
-        tvSignUpPrompt.setOnClickListener(v -> Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_signUpFragment));
+        tvSignUpPrompt.setOnClickListener(v -> {
+            Navigation.findNavController(v).navigate(R.id.action_loginFragment_to_signUpFragment);
+        });
 
         return view;
     }
-
-    private void checkIfUserIsLoggedIn() {
-        int loggedInUserId = prefs.getInt(SignUpFragment.KEY_USER_ID, SignUpFragment.DEFAULT_USER_ID);
-        if (loggedInUserId != SignUpFragment.DEFAULT_USER_ID) {
-            // User was previously logged in, check if interests are set
-            navigateToNextScreen(loggedInUserId, true); // true indicates it's an auto-login check
-        }
-    }
-
 
     private void attemptLogin() {
         String username = etUsernameLogin.getText().toString().trim(); // Using username as email
@@ -90,33 +78,31 @@ public class LoginFragment extends Fragment {
         if (userDao == null && getContext() != null) {
              userDao = DatabaseClient.getInstance(getContext().getApplicationContext()).getAppDatabase().userDao();
         }
-         if (userDao == null) {
+        if (userDao == null) {
             Toast.makeText(getContext(), "Database error.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-
         executorService.execute(() -> {
-            // For now, assuming username field is for email
-            User user = userDao.getUserByEmail(username);
+            User user = userDao.getUserByEmail(username); // Assuming username field is for email
 
             final boolean loginSuccess;
-            final int userId;
+            final int userIdToProceedWith;
 
             if (user != null && user.getPassword().equals(password)) { // Plaintext password check for now
                 loginSuccess = true;
-                userId = user.getId();
+                userIdToProceedWith = user.getId();
             } else {
                 loginSuccess = false;
-                userId = SignUpFragment.DEFAULT_USER_ID;
+                userIdToProceedWith = SignUpFragment.DEFAULT_USER_ID; // Not strictly needed here, but for consistency
             }
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     if (loginSuccess) {
-                        saveUserIdToPrefs(userId);
+                        saveUserIdToPrefs(userIdToProceedWith); // Save user ID on successful login
                         Toast.makeText(getContext(), "Login Successful!", Toast.LENGTH_SHORT).show();
-                        navigateToNextScreen(userId, false); // false - not an auto-login
+                        navigateToNextScreen(userIdToProceedWith);
                     } else {
                         Toast.makeText(getContext(), "Invalid email or password.", Toast.LENGTH_SHORT).show();
                     }
@@ -125,13 +111,12 @@ public class LoginFragment extends Fragment {
         });
     }
 
-    private void navigateToNextScreen(int userId, boolean isAutoLogin) {
+    private void navigateToNextScreen(int userId) {
          if (userTopicDao == null && getContext() != null) {
              userTopicDao = DatabaseClient.getInstance(getContext().getApplicationContext()).getAppDatabase().userTopicDao();
         }
         if (userTopicDao == null) {
-            if(!isAutoLogin) Toast.makeText(getContext(), "Database error checking interests.", Toast.LENGTH_SHORT).show();
-            // Decide on a fallback, maybe go to dashboard or show error
+            Toast.makeText(getContext(), "Database error checking interests.", Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -139,14 +124,12 @@ public class LoginFragment extends Fragment {
             List<UserTopic> userTopics = userTopicDao.getUserTopics(userId);
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    if (getView() == null) return; // Fragment view is not available
+                    if (getView() == null) return;
 
                     if (userTopics != null && !userTopics.isEmpty()) {
                         Navigation.findNavController(getView()).navigate(R.id.action_loginFragment_to_dashboardActivity);
                     } else {
-                        // If it's an auto-login and interests are not set, still go to interests
-                        // If it's a manual login and interests are not set, go to interests
-                        Navigation.findNavController(getView()).navigate(R.id.action_loginFragment_to_signUpFragment);
+                        Navigation.findNavController(getView()).navigate(R.id.action_loginFragment_to_yourInterestsFragment);
                     }
                 });
             }
@@ -158,7 +141,7 @@ public class LoginFragment extends Fragment {
         editor.putInt(SignUpFragment.KEY_USER_ID, userId);
         editor.apply();
     }
-    
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();

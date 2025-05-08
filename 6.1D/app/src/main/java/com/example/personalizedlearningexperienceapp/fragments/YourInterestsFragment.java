@@ -140,8 +140,6 @@ public class YourInterestsFragment extends Fragment {
             holder.topicToggleButton.setTextOn(topic); // Ensures text is shown when checked
             holder.topicToggleButton.setTextOff(topic); // Ensures text is shown when unchecked
 
-            holder.topicToggleButton.setChecked(selectedTopicsInternal.contains(topic));
-
             // Important: To avoid issues with RecyclerView re-binding, remove previous listener
             // then set the new one, or manage state more carefully.
             // For simplicity here, we'll set it directly.
