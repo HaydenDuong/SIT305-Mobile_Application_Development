@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/dashboard_nav_graph"
+    app:startDestination="@id/dashboardFragment">
+
+    <fragment
+        android:id="@+id/dashboardFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.DashboardFragment"
+        android:label="Dashboard"
+        tools:layout="@layout/fragment_dashboard" >
+        <action
+            android:id="@+id/action_dashboardFragment_to_quizFragment"
+            app:destination="@id/quizFragment" />
+        <action
+            android:id="@+id/action_dashboardFragment_to_editInterests"
+            app:destination="@id/yourInterestsFragment_in_dashboard" >
+            <argument
+                android:name="isEditingMode"
+                app:argType="boolean"
+                android:defaultValue="true"/>
+        </action>
+    </fragment>
+
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.QuizFragment"
+        android:label="Quiz"
+        tools:layout="@layout/fragment_quiz" > <!-- Assuming layout name -->
+        <action
+            android:id="@+id/action_quizFragment_to_resultFragment"
+            app:destination="@id/resultFragment" />
+        <argument
+            android:name="topic"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/resultFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.ResultFragment"
+        android:label="Results"
+        tools:layout="@layout/fragment_result" > <!-- Assuming layout name -->
+        <action
+            android:id="@+id/action_resultFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment"
+            app:popUpTo="@id/dashboardFragment"
+            app:popUpToInclusive="true"/> <!-- Go back to dashboard, clear quiz/result from stack -->
+    </fragment>
+
+    <fragment
+        android:id="@+id/yourInterestsFragment_in_dashboard"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.YourInterestsFragment"
+        android:label="Edit Your Interests"
+        tools:layout="@layout/fragment_your_interests">
+        <argument
+            android:name="isEditingMode"
+            app:argType="boolean"
+            android:defaultValue="true" />
+    </fragment>
+</navigation>

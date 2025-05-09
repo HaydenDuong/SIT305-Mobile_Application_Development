@@ -13,6 +13,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -40,16 +41,23 @@ public class YourInterestsFragment extends Fragment {
     private UserTopicDao userTopicDao;
     private ExecutorService executorService;
     private int currentUserId = SignUpFragment.DEFAULT_USER_ID;
+    private boolean isEditingMode = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if (getArguments() != null) {
+            isEditingMode = getArguments().getBoolean("isEditingMode", false);
+        }
+
         if (getContext() != null) {
             userTopicDao = DatabaseClient.getInstance(getContext().getApplicationContext()).getAppDatabase().userTopicDao();
             SharedPreferences prefs = getContext().getApplicationContext().getSharedPreferences(SignUpFragment.PREFS_NAME, Context.MODE_PRIVATE);
             currentUserId = prefs.getInt(SignUpFragment.KEY_USER_ID, SignUpFragment.DEFAULT_USER_ID);
         }
         executorService = Executors.newSingleThreadExecutor();
+        selectedTopicsList = new ArrayList<>();
     }
 
     @Nullable
@@ -70,11 +78,37 @@ public class YourInterestsFragment extends Fragment {
         topicAdapter = new TopicAdapter(allTopics, selectedTopicsList);
         rvTopics.setAdapter(topicAdapter);
 
+        loadUserInterests();
+
         btnNext.setOnClickListener(v -> saveInterestsAndProceed());
 
         return view;
     }
 
+    private void loadUserInterests() {
+        if (currentUserId == SignUpFragment.DEFAULT_USER_ID || userTopicDao == null) {
+            return; // Cannot load if no user or DAO
+        }
+        executorService.execute(() -> {
+            List<UserTopic> previouslySelected = userTopicDao.getUserTopics(currentUserId);
+            List<String> previouslySelectedNames = new ArrayList<>();
+            for (UserTopic ut : previouslySelected) {
+                previouslySelectedNames.add(ut.getTopic());
+            }
+
+            if (getActivity() != null) {
+                getActivity().runOnUiThread(() -> {
+                    selectedTopicsList.clear(); // Clear before adding, in case this is called multiple times
+                    selectedTopicsList.addAll(previouslySelectedNames);
+                    if (topicAdapter != null) {
+                        topicAdapter.notifyDataSetChanged(); // Refresh the adapter to show selections
+                    }
+                });
+            }
+        });
+    }
+        
+    
     private void saveInterestsAndProceed() {
         if (selectedTopicsList.isEmpty()) {
             Toast.makeText(getContext(), "Please select at least one interest.", Toast.LENGTH_SHORT).show();
@@ -93,8 +127,8 @@ public class YourInterestsFragment extends Fragment {
         }
 
         executorService.execute(() -> {
-            // Optional: Clear old topics first if this is a re-selection screen
-            // userTopicDao.deleteUserTopics(currentUserId);
+            // Clear old topics first if this is a re-selection screen
+            userTopicDao.deleteUserTopics(currentUserId);
 
             for (String topic : selectedTopicsList) {
                 UserTopic userTopic = new UserTopic(currentUserId, topic);
@@ -103,9 +137,17 @@ public class YourInterestsFragment extends Fragment {
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Interests saved!", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), isEditingMode ? "Interests updated!" : "Interests saved!", Toast.LENGTH_SHORT).show();
                     if (getView() != null) {
-                        Navigation.findNavController(getView()).navigate(R.id.action_yourInterestsFragment_to_dashboardActivity);
+                        NavController navController = Navigation.findNavController(getView());
+                        
+                        if (isEditingMode) {
+                            // If editing mode, pop back to the DashboardFragment
+                            navController.popBackStack();
+                        } else {
+                            // Initial setup, navigate to DashboardActivity
+                            navController.navigate(R.id.action_yourInterestsFragment_to_dashboardActivity);
+                        }
                     }
                 });
             }
