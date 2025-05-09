@@ -40,7 +40,7 @@ def fetchQuizFromLlama(student_topic):
         f"**OPTION B:** [Second option]\n"
         f"**OPTION C:** [Third option]\n"
         f"**OPTION D:** [Fourth option]\n"
-        f"**ANS:** [Correct answer letter]\n\n"
+        f"**ANS:** [ONLY THE SINGLE CORRECT LETTER: A, B, C, or D. For example: B]\n\n"
         f"Ensure text is properly formatted. It needs to start with a question, then the options, and finally the correct answer. "
         f"Follow this pattern for all questions. "
         f"Do not include any additional information, questions, or prompts beyond the 3 questions specified above. "

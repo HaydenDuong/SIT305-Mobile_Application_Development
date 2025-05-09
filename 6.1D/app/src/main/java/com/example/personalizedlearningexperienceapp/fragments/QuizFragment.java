@@ -289,48 +289,39 @@ public class QuizFragment extends Fragment {
                 return;
             }
 
-            // Process the submitted answer
             QuizQuestion currentQuestion = allQuestionsList.get(currentQuestionIndex);
-            String selectedAnswerText = answerButtons.get(selectedAnswerIndex).getText().toString();
-            int correctAnswerButtonIndex = -1;
+            String correctAnswerLetter = currentQuestion.getCorrectAnswer().trim().toUpperCase();
 
-            // Find which button holds the correct answer text
-            // This assumes the LLM returns the correct answer as one of the option texts
-            List<String> optionTexts = currentQuestion.getOptions();
-            for(int i=0; i < optionTexts.size(); i++) {
-                if (optionTexts.get(i).equals(currentQuestion.getCorrectAnswer())) {
-                    correctAnswerButtonIndex = i;
+            int correctAnswerActualIndex = -1; 
+            switch (correctAnswerLetter) {
+                case "A": correctAnswerActualIndex = 0; break;
+                case "B": correctAnswerActualIndex = 1; break;
+                case "C": correctAnswerActualIndex = 2; break;
+                case "D": correctAnswerActualIndex = 3; break;
+                default:
+                    Log.e(TAG, "Invalid correct answer letter from API: " + correctAnswerLetter);
+                    // If the letter is invalid, we can't determine the correct button to highlight green.
+                    // The user's answer will be marked based on selectedAnswerIndex vs an invalid correctAnswerActualIndex.
                     break;
-                }
             }
-            // Fallback if correct answer text not found in options (should not happen with good data)
-             if (correctAnswerButtonIndex == -1 && optionTexts.contains(currentQuestion.getCorrectAnswer())) {
-                // This case might not be needed if using index-based correct answer
-                Log.w(TAG, "Correct answer text was found but not directly an option index, this may indicate an issue.");
-             }
 
+            if (getContext() == null) return; // Ensure fragment is still attached
 
-            if (getContext() == null) return;
-
-            if (selectedAnswerText.equals(currentQuestion.getCorrectAnswer())) {
+            if (selectedAnswerIndex == correctAnswerActualIndex) {
                 score++;
                 answerButtons.get(selectedAnswerIndex).setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), android.R.color.holo_green_light)));
             } else {
+                // User was wrong
                 answerButtons.get(selectedAnswerIndex).setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), android.R.color.holo_red_light)));
-                if (correctAnswerButtonIndex != -1 && correctAnswerButtonIndex < answerButtons.size()) {
-                    answerButtons.get(correctAnswerButtonIndex).setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), android.R.color.holo_green_light)));
+                // Highlight the actual correct answer button if the letter was valid and index is in bounds
+                if (correctAnswerActualIndex != -1 && correctAnswerActualIndex < answerButtons.size()) {
+                    answerButtons.get(correctAnswerActualIndex).setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), android.R.color.holo_green_light)));
                 } else {
-                    Log.e(TAG, "Correct answer button index out of bounds or not found. Correct Answer Text: " + currentQuestion.getCorrectAnswer());
-                     // Potentially iterate through buttons to find the one matching correct_answer text
-                    for(int i=0; i<answerButtons.size(); i++){
-                        if(i < optionTexts.size() && answerButtons.get(i).getText().toString().equals(currentQuestion.getCorrectAnswer())){
-                             answerButtons.get(i).setBackgroundTintList(ColorStateList.valueOf(ContextCompat.getColor(getContext(), android.R.color.holo_green_light)));
-                             break;
-                        }
-                    }
+                     Log.e(TAG, "Could not highlight correct answer button because correct index was invalid. Index: " + correctAnswerActualIndex + ", Letter: " + correctAnswerLetter);
                 }
-            }
+            } // This brace closes the else for 'if (selectedAnswerIndex == correctAnswerActualIndex)'
 
+            // All the following logic belongs to the 'Submit' action, after evaluating the answer
             isAnswerSubmitted = true;
             for (Button btn : answerButtons) {
                 btn.setEnabled(false); // Disable answer buttons after submission
@@ -341,8 +332,9 @@ public class QuizFragment extends Fragment {
             } else {
                 buttonQuizAction.setText(getString(R.string.done_button_text));
             }
+            // End of the 'if (!isAnswerSubmitted)' block
 
-        } else { // ---- Current state: "Next" or "Done" ----
+        } else { // This 'else' corresponds to 'if (!isAnswerSubmitted)' -- i.e., button was "Next" or "Done"
             currentQuestionIndex++;
             if (currentQuestionIndex < allQuestionsList.size()) { // More questions left ("Next")
                 displayCurrentQuestion(); // This will reset isAnswerSubmitted and button text
