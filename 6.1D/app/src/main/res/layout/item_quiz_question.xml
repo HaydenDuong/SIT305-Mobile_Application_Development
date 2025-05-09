@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingTop="8dp"
+    android:paddingBottom="16dp"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp">
+
+    <TextView
+        android:id="@+id/textViewItemQuestion"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="?attr/textAppearanceSubtitle1"
+        android:textStyle="bold"
+        android:layout_marginBottom="8dp"
+        android:text="Question text will appear here." /> <!-- tools:text for preview -->
+
+    <RadioGroup
+        android:id="@+id/radioGroupItemOptions"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- RadioButtons will be added dynamically or via data binding -->
+        <!-- Example for preview (remove if adding all dynamically):
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Option 1"/>
+        <RadioButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Option 2"/>
+        -->
+    </RadioGroup>
+
+</LinearLayout>

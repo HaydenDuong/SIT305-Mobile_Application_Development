@@ -76,7 +76,7 @@ public class DashboardFragment extends Fragment implements DashboardTopicAdapter
                 try {
                     Bundle args = new Bundle();
                     args.putBoolean("isEditingMode", true);
-                    
+
                     Navigation.findNavController(getView()).navigate(R.id.action_dashboardFragment_to_editInterests);
                 } catch (IllegalArgumentException e) {
                     Toast.makeText(getContext(), "Navigation Error: Cannot edit interests now.", Toast.LENGTH_SHORT).show();
@@ -152,7 +152,7 @@ public class DashboardFragment extends Fragment implements DashboardTopicAdapter
         if (getView() != null && topic != null) {
             try {
                 Bundle args = new Bundle();
-                args.putString("topic", topic.getTopic());
+                args.putString(QuizFragment.ARG_TOPIC_NAME, topic.getTopic());
 
                 Navigation.findNavController(getView()).navigate(R.id.action_dashboardFragment_to_quizFragment, args);
 

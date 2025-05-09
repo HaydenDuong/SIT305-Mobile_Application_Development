@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Personalized Learning Experience App</string>
+    <string name="submit_quiz">Submit Quiz</string>
+    <string name="quiz_completed_title">Quiz Completed!</string>
+    <string name="quiz_results_for_topic_format">Results for: %1$s</string>
+    <string name="your_score_format">Your Score: %1$d / %2$d</string>
+    <string name="back_to_dashboard">Back to Dashboard</string>
     <plurals name="topics_to_explore_count">
         <item quantity="one">You have %d topic to explore</item>
         <item quantity="other">You have %d topics to explore</item>

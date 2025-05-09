@@ -32,7 +32,7 @@
             android:id="@+id/action_quizFragment_to_resultFragment"
             app:destination="@id/resultFragment" />
         <argument
-            android:name="topic"
+            android:name="topicName"
             app:argType="string" />
     </fragment>
 
