@@ -52,4 +52,6 @@ dependencies {
     // dependencies for Room Database
     implementation(libs.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
+
+    implementation(libs.material)
 }
