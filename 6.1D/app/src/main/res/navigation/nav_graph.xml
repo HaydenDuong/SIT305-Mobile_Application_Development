@@ -8,7 +8,7 @@
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.personalizedlearningexperienceapp.fragments.LoginFragment"
-        android:label="LoginFragment">
+        android:label="Login">
         <action
             android:id="@+id/action_loginFragment_to_dashboardActivity"
             app:destination="@id/dashboardActivity" />
@@ -23,7 +23,7 @@
     <fragment
         android:id="@+id/signUpFragment"
         android:name="com.example.personalizedlearningexperienceapp.fragments.SignUpFragment"
-        android:label="SignUpFragment">
+        android:label="Sign Up">
         <action
             android:id="@+id/action_signUpFragment_to_yourInterestsFragment"
             app:destination="@id/yourInterestsFragment" />
@@ -50,7 +50,7 @@
         <fragment
             android:id="@+id/dashboardFragment"
             android:name="com.example.personalizedlearningexperienceapp.fragments.DashboardFragment"
-            android:label="DashboardFragment">
+            android:label="Dashboard">
             <action
                 android:id="@+id/action_dashboardFragment_to_quizFragment"
                 app:destination="@id/quizFragment" />
@@ -58,7 +58,7 @@
         <fragment
             android:id="@+id/quizFragment"
             android:name="com.example.personalizedlearningexperienceapp.fragments.QuizFragment"
-            android:label="QuizFragment">
+            android:label="Quiz">
             <action
                 android:id="@+id/action_quizFragment_to_resultFragment"
                 app:destination="@id/resultFragment" />
@@ -66,7 +66,7 @@
         <fragment
             android:id="@+id/resultFragment"
             android:name="com.example.personalizedlearningexperienceapp.fragments.ResultFragment"
-            android:label="ResultFragment">
+            android:label="Result">
             <action
                 android:id="@+id/action_resultFragment_to_dashboardFragment"
                 app:destination="@id/dashboardFragment" />

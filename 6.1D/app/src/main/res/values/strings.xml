@@ -7,6 +7,7 @@
     <string name="next_button_text">Next</string>
     <string name="done_button_text">Done</string>
     <string name="quiz_results_for_topic_format">Results for: %1$s</string>
+    <string name="back_to_dashboard_button_text">Back to Dashboard</string>
     <string name="your_score_format">Your Score: %1$d / %2$d</string>
     <string name="back_to_dashboard">Back to Dashboard</string>
     <plurals name="topics_to_explore_count">

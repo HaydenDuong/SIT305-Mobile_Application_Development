@@ -39,7 +39,7 @@
     <fragment
         android:id="@+id/resultFragment"
         android:name="com.example.personalizedlearningexperienceapp.fragments.ResultFragment"
-        android:label="Results"
+        android:label="Result"
         tools:layout="@layout/fragment_result" > <!-- Assuming layout name -->
         <action
             android:id="@+id/action_resultFragment_to_dashboardFragment"

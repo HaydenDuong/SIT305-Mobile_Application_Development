@@ -6,6 +6,7 @@ import android.graphics.Color; // For simple color changes, or use ContextCompat
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.Parcelable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -351,6 +352,12 @@ public class QuizFragment extends Fragment {
         bundle.putInt(ResultFragment.ARG_SCORE, score);
         bundle.putInt(ResultFragment.ARG_TOTAL_QUESTIONS, allQuestionsList.size());
         bundle.putString(ResultFragment.ARG_TOPIC_NAME, topicName);
+        // Add the questions list to the bundle
+        if (allQuestionsList instanceof ArrayList) {
+            bundle.putParcelableArrayList(ResultFragment.ARG_QUESTIONS_LIST, (ArrayList<? extends Parcelable>) allQuestionsList);
+        } else {
+            bundle.putParcelableArrayList(ResultFragment.ARG_QUESTIONS_LIST, new ArrayList<Parcelable>(allQuestionsList));
+        }
 
         try {
             if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.quizFragment) {

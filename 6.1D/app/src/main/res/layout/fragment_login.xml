@@ -32,6 +32,7 @@
         android:layout_height="50dp"
         android:hint="Username"
         android:layout_marginTop="32dp"
+        android:background="@android:drawable/edit_text"
         app:layout_constraintTop_toBottomOf="@id/text"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -43,6 +44,7 @@
         android:hint="Password"
         android:inputType="textPassword"
         android:layout_marginTop="16dp"
+        android:background="@android:drawable/edit_text"
         app:layout_constraintTop_toBottomOf="@id/et_username"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
