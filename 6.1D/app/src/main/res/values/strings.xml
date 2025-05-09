@@ -2,6 +2,10 @@
     <string name="app_name">Personalized Learning Experience App</string>
     <string name="submit_quiz">Submit Quiz</string>
     <string name="quiz_completed_title">Quiz Completed!</string>
+    <string name="question_number_format">Question %1$d of %2$d</string>
+    <string name="submit_button_text">Submit</string>
+    <string name="next_button_text">Next</string>
+    <string name="done_button_text">Done</string>
     <string name="quiz_results_for_topic_format">Results for: %1$s</string>
     <string name="your_score_format">Your Score: %1$d / %2$d</string>
     <string name="back_to_dashboard">Back to Dashboard</string>
