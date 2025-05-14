@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="login_background_blue">#3498DB</color>
+    <color name="login_button_green">#2ECC71</color>
+    <color name="input_hint_text_color">#A0A0A0</color>
+    <color name="input_text_color_dark">#333333</color>
+    <color name="chat_bubble_background_light">#EFEFEF</color>
+</resources>

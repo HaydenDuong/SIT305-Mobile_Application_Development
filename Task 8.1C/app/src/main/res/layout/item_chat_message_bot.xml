@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="8dp"
+    android:paddingEnd="60dp"
+    android:paddingTop="4dp"
+    android:paddingBottom="4dp">
+
+    <ImageView
+        android:id="@+id/imageViewAvatarBot"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="@drawable/avatar_background_bot"
+        android:src="@android:drawable/ic_menu_add"
+        app:tint="@color/white"
+        android:padding="8dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:contentDescription="Bot Avatar" />
+
+    <TextView
+        android:id="@+id/textViewMessageBot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:background="@drawable/chat_bubble_bot"
+        android:padding="10dp"
+        android:text="Bot message here"
+        android:textColor="@color/input_text_color_dark"
+        android:textSize="16sp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintStart_toEndOf="@id/imageViewAvatarBot"
+        app:layout_constraintTop_toTopOf="@id/imageViewAvatarBot"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
