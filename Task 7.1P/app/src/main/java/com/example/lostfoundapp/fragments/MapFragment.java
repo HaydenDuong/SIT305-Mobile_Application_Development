@@ -51,19 +51,20 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap map) {
         googleMap = map;
         Log.d(TAG, "Map is ready.");
-        // TODO: Configure map settings if needed (e.g., UI settings, map type)
-        // googleMap.getUiSettings().setZoomControlsEnabled(true);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
 
         // Observe items from ViewModel and add markers
         itemViewModel.getAllItems().observe(getViewLifecycleOwner(), items -> {
             if (items != null && googleMap != null) {
-                Log.d(TAG, "Received " + items.size() + " items to display on map.");
-                googleMap.clear(); // Clear existing markers
+                Log.d("MapFragment", "Observer triggered. Number of items from ViewModel: " + items.size());
+                googleMap.clear();
                 LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
                 boolean hasValidLocation = false;
+                int markersAdded = 0;
 
                 for (Item item : items) {
                     if (item.getLatitude() != null && item.getLongitude() != null) {
+                        Log.d(TAG, "Processing item: " + item.getName() + " with Lat: " + item.getLatitude() + ", Lng: " + item.getLongitude());
                         LatLng itemLocation = new LatLng(item.getLatitude(), item.getLongitude());
                         MarkerOptions markerOptions = new MarkerOptions()
                                 .position(itemLocation)
@@ -80,30 +81,36 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
                         googleMap.addMarker(markerOptions);
                         boundsBuilder.include(itemLocation);
                         hasValidLocation = true;
+                        markersAdded++;
                     } else {
-                        Log.w(TAG, "Item '" + item.getName() + "' has no location data, not showing on map.");
+                        Log.w(TAG, "Item '" + item.getName() + "' has INCOMPLETE location data. Latitude: " + item.getLatitude() + ", Longitude: " + item.getLongitude() + ". Not showing on map.");
                     }
                 }
+                Log.d(TAG, "Finished processing items. Added " + markersAdded + " markers.");
 
-                if (hasValidLocation) {
+                if (hasValidLocation && markersAdded > 0) {
                     try {
                         LatLngBounds bounds = boundsBuilder.build();
-                        // Adjust padding as needed, e.g., 100 pixels
                         googleMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
                     } catch (IllegalStateException e) {
-                        // This can happen if no locations were added to boundsBuilder (e.g., only one item with location)
-                        // Fallback to moving to the first item or a default location
-                        Log.e(TAG, "Error building bounds, possibly only one marker or no markers: " + e.getMessage());
-                        if (!items.isEmpty() && items.get(0).getLatitude() != null && items.get(0).getLongitude() != null) {
-                            LatLng firstItemLoc = new LatLng(items.get(0).getLatitude(), items.get(0).getLongitude());
-                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(firstItemLoc, 10f)); // Zoom level 10
+                        Log.e(TAG, "Error building bounds: " + e.getMessage() + ". Will attempt to zoom to first valid item if available.");
+                        // Fallback for single marker (boundsBuilder.build() throws if only one point)
+                        // or if items list was manipulated unexpectedly.
+                        for (Item item : items) { // Find the first valid item to zoom to
+                            if (item.getLatitude() != null && item.getLongitude() != null) {
+                                LatLng firstValidItemLoc = new LatLng(item.getLatitude(), item.getLongitude());
+                                googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(firstValidItemLoc, 10f));
+                                Log.d(TAG, "Fell back to zooming to first valid item: " + item.getName());
+                                break; // Zoom to the first one found
+                            }
                         }
-                        // else handle case with no items with locations at all - maybe show a default location like city center
                     }
                 } else {
                     Log.d(TAG, "No items with valid locations to display on map.");
                     // Optionally move camera to a default location or show a message
                 }
+            } else {
+                Log.d(TAG, "Observer triggered but items list or googleMap is null. Items: " + (items == null ? "null" : "not null, size " + items.size()) + ", googleMap is null: " + (googleMap == null));
             }
         });
     }

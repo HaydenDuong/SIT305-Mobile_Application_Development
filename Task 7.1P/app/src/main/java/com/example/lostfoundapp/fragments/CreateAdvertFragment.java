@@ -210,6 +210,11 @@ public class CreateAdvertFragment extends Fragment {
             return;
         }
 
+        Log.d("CreateAdvertFragment", "Before creating Item. Name: " + name +
+                ", LocationText: " + location + // The text from the EditText
+                ", currentLatitude: " + currentLatitude + // Value from "Get Current Location" or "Place Autocomplete"
+                ", currentLongitude: " + currentLongitude); // Value from "Get Current Location" or "Place Autocomplete"
+
         // currentLatitude and currentLongitude are updated by either fetchCurrentLocation()
         // or the FragmentResultListener for place autocomplete
         Item newItem = new Item(type, name, phone, description, dateTimestamp, location, currentLatitude, currentLongitude);
