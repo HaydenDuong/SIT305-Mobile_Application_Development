@@ -10,12 +10,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import com.example.lostfoundapp.R; // Your app's R class
+import com.example.lostfoundapp.R;
 
 public class HomeFragment extends Fragment {
 
     private Button buttonCreateAdvert;
     private Button buttonShowAllItems;
+    private Button buttonShowOnMap;
     private NavController navController;
 
     public HomeFragment() {
@@ -38,6 +39,7 @@ public class HomeFragment extends Fragment {
         // Find buttons
         buttonCreateAdvert = view.findViewById(R.id.button_create_advert);
         buttonShowAllItems = view.findViewById(R.id.button_show_all_items);
+        buttonShowOnMap = view.findViewById(R.id.button_show_on_map);
 
         // Set click listeners
         buttonCreateAdvert.setOnClickListener(v -> {
@@ -46,6 +48,11 @@ public class HomeFragment extends Fragment {
 
         buttonShowAllItems.setOnClickListener(v -> {
             navController.navigate(R.id.action_homeFragment_to_showItemsFragment);
+        });
+
+        buttonShowOnMap.setOnClickListener(v -> {
+            // We will define action_homeFragment_to_mapFragment in nav_graph.xml next
+            navController.navigate(R.id.action_homeFragment_to_mapFragment);
         });
     }
 }

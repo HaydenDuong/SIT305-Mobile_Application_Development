@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_homeFragment_to_showItemsFragment"
             app:destination="@id/showItemsFragment" />
+        <action
+            android:id="@+id/action_homeFragment_to_mapFragment"
+            app:destination="@id/mapFragment" />
     </fragment>
 
     <fragment
@@ -51,5 +54,11 @@
         android:name="com.example.lostfoundapp.fragments.PlaceAutocompleteFragment"
         android:label="Select Location"
         tools:layout="@layout/fragment_place_autocomplete" />
+
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="com.example.lostfoundapp.fragments.MapFragment"
+        android:label="Items on Map"
+        tools:layout="@layout/fragment_map" />
 
 </navigation>
