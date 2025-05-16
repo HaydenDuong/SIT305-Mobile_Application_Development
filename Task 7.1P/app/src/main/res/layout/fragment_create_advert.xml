@@ -140,8 +140,21 @@
                 android:id="@+id/editText_location"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textCapWords"/>
+                android:inputType="textCapWords"
+                android:focusable="false" />
         </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/button_get_current_location"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Get Current Location"
+            android:textAllCaps="false"
+            app:layout_constraintTop_toBottomOf="@id/textInputLayout_location"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
 
         <Button
             android:id="@+id/button_save"
@@ -149,7 +162,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:text="Save"
-            app:layout_constraintTop_toBottomOf="@id/textInputLayout_location"
+            app:layout_constraintTop_toBottomOf="@id/button_get_current_location"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -47,6 +47,11 @@ dependencies {
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.common.java8)
 
+    // Google Play Services for location, maps, and places
+    implementation(libs.play.services.location)
+    implementation(libs.play.services.maps)
+    implementation(libs.places)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)

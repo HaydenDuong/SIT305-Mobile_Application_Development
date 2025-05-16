@@ -22,7 +22,11 @@
         android:id="@+id/createAdvertFragment"
         android:name="com.example.lostfoundapp.fragments.CreateAdvertFragment"
         android:label="Create New Advert"
-        tools:layout="@layout/fragment_create_advert" />
+        tools:layout="@layout/fragment_create_advert" >
+        <action
+            android:id="@+id/action_createAdvertFragment_to_placeAutocompleteFragment"
+            app:destination="@id/placeAutocompleteFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/showItemsFragment"
@@ -40,4 +44,12 @@
         android:label="Item Details"
         tools:layout="@layout/fragment_item_detail">
     </fragment>
+
+    <!-- New Destination for Place Autocomplete -->
+    <fragment
+        android:id="@+id/placeAutocompleteFragment"
+        android:name="com.example.lostfoundapp.fragments.PlaceAutocompleteFragment"
+        android:label="Select Location"
+        tools:layout="@layout/fragment_place_autocomplete" />
+
 </navigation>
