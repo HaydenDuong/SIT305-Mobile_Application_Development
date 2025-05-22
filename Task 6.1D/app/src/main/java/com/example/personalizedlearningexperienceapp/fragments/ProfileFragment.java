@@ -3,6 +3,7 @@ package com.example.personalizedlearningexperienceapp.fragments;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -57,8 +58,9 @@ public class ProfileFragment extends Fragment {
         buttonUpgradeAccount = view.findViewById(R.id.buttonUpgradeAccount);
         buttonShareProfile = view.findViewById(R.id.buttonShareProfile);
 
-        // Set up click listeners
-        textViewTotalQuestionsLabel.setOnClickListener(v -> {
+        // Make entire Total Questions card clickable
+        CardView cardViewTotalQuestions = view.findViewById(R.id.cardViewTotalQuestions);
+        cardViewTotalQuestions.setOnClickListener(v -> {
             if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.profileFragment) {
                 navController.navigate(R.id.action_profileFragment_to_historyFragment);
             }
@@ -74,8 +76,7 @@ public class ProfileFragment extends Fragment {
             Toast.makeText(getContext(), "Share Profile (QR Code) clicked - To be implemented", Toast.LENGTH_SHORT).show();
         });
 
-        // Call loadProfileData() from ViewModel to fetch data
-        profileViewModel.loadProfileData(); // <<< --- ADD THIS LINE
+        profileViewModel.loadProfileData();
 
         observeViewModel();
     }
