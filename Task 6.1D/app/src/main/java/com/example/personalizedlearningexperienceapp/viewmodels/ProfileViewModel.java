@@ -42,8 +42,6 @@ public class ProfileViewModel extends AndroidViewModel {
 
     // LiveData getters for the Fragment to observe
     public LiveData<User> getUserLiveData() { return userLiveData; }
-    public LiveData<String> getUsernameLiveData() { return usernameLiveData; }
-    public LiveData<String> getEmailLiveData() { return emailLiveData; }
     public LiveData<String> getAccountTierLiveData() { return accountTierLiveData; }
     public LiveData<Integer> getTotalQuestionsAnsweredLiveData() { return totalQuestionsAnsweredLiveData; }
     public LiveData<Integer> getCorrectAnswersLiveData() { return correctAnswersLiveData; }

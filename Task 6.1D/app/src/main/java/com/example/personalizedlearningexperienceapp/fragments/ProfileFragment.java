@@ -15,7 +15,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.viewmodels.ProfileViewModel;
-import com.example.personalizedlearningexperienceapp.data.User;
 
 
 public class ProfileFragment extends Fragment {
