@@ -1,5 +1,11 @@
 package com.example.personalizedlearningexperienceapp.fragments;
 
+import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.graphics.Bitmap;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -8,14 +14,26 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.viewmodels.ProfileViewModel;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
+
+import java.io.IOException;
+import java.io.OutputStream;
 
 
 public class ProfileFragment extends Fragment {
@@ -73,7 +91,7 @@ public class ProfileFragment extends Fragment {
         });
 
         buttonShareProfile.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Share Profile (QR Code) clicked - To be implemented", Toast.LENGTH_SHORT).show();
+            showQrCodeDialog();
         });
 
         profileViewModel.loadProfileData();
@@ -108,5 +126,107 @@ public class ProfileFragment extends Fragment {
         profileViewModel.getIncorrectAnswersLiveData().observe(getViewLifecycleOwner(), incorrect -> {
             textViewIncorrectAnswers.setText(incorrect != null ? String.valueOf(incorrect) : "0");
         });
+    }
+
+    private void showQrCodeDialog() {
+        // Get profile data for QR
+        String username = textViewUsername.getText().toString();
+        String stats = "Total: " + textViewTotalQuestions.getText() +
+                ", Correct: " + textViewCorrectAnswers.getText() +
+                ", Incorrect: " + textViewIncorrectAnswers.getText();
+
+        // Create QR content
+        String qrContent = "PROFILE\n" +
+                "Username: " + username + "\n" +
+                "Stats: " + stats + "\n" +
+                "App: Personalized Learning Experience";
+
+        // Create dialog
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_qr_code, null);
+        builder.setView(dialogView);
+
+        // Initialize dialog views
+        TextView textViewQrUsername = dialogView.findViewById(R.id.textViewQrUsername);
+        TextView textViewQrStats = dialogView.findViewById(R.id.textViewQrStats);
+        ImageView imageViewQrCode = dialogView.findViewById(R.id.imageViewQrCode);
+        Button buttonSaveQr = dialogView.findViewById(R.id.buttonSaveQr);
+        Button buttonCloseQr = dialogView.findViewById(R.id.buttonCloseQr);
+
+        // Set text
+        textViewQrUsername.setText("Username: " + username);
+        textViewQrStats.setText(stats);
+
+        // Generate QR Code
+        try {
+            MultiFormatWriter multiFormatWriter = new MultiFormatWriter();
+            BitMatrix bitMatrix = multiFormatWriter.encode(
+                    qrContent,
+                    BarcodeFormat.QR_CODE,
+                    500, 500
+            );
+
+            BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
+            Bitmap bitmap = barcodeEncoder.createBitmap(bitMatrix);
+            imageViewQrCode.setImageBitmap(bitmap);
+
+            // Create and show the dialog
+            AlertDialog dialog = builder.create();
+
+            // Set save button click listener
+            buttonSaveQr.setOnClickListener(v -> {
+                saveQrCodeToGallery(bitmap);
+            });
+
+            // Set close button click listener
+            buttonCloseQr.setOnClickListener(v -> {
+                dialog.dismiss();
+            });
+
+            dialog.show();
+
+        } catch (WriterException e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "Error generating QR code", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void saveQrCodeToGallery(Bitmap qrBitmap) {
+        // For Android 10+ (Q), use MediaStore API
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Images.Media.DISPLAY_NAME, "profile_qr_code_" + System.currentTimeMillis() + ".jpg");
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg");
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/PersonalizedLearning");
+
+            ContentResolver resolver = requireContext().getContentResolver();
+            Uri uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
+
+            try {
+                if (uri != null) {
+                    try (OutputStream outputStream = resolver.openOutputStream(uri)) {
+                        qrBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                        Toast.makeText(getContext(), "QR code saved to gallery", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            } catch (IOException e) {
+                Toast.makeText(getContext(), "Failed to save QR code", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+            }
+        } else {
+            // For older Android versions
+            String savedImagePath = MediaStore.Images.Media.insertImage(
+                    requireContext().getContentResolver(),
+                    qrBitmap,
+                    "Profile QR Code",
+                    "QR Code for profile sharing"
+            );
+
+            if (savedImagePath != null) {
+                Toast.makeText(getContext(), "QR code saved to gallery", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "Failed to save QR code", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }

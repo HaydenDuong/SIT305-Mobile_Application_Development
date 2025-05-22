@@ -47,6 +47,16 @@ public class ProfileViewModel extends AndroidViewModel {
     public LiveData<Integer> getCorrectAnswersLiveData() { return correctAnswersLiveData; }
     public LiveData<Integer> getIncorrectAnswersLiveData() { return incorrectAnswersLiveData; }
 
+    private void recalculateIncorrectAnswers() {
+        Integer total = totalQuestionsAnsweredLiveData.getValue();
+        Integer correct = correctAnswersLiveData.getValue();
+
+        if (total != null && correct != null) {
+            // Make sure we never have negative incorrect answers
+            incorrectAnswersLiveData.postValue(Math.max(0, total - correct));
+        }
+    }
+
     public void loadProfileData() {
         if (currentUserId == null) {
             // Post null or default/error states if no user is logged in
