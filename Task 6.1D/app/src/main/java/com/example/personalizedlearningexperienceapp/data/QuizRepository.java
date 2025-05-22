@@ -4,9 +4,6 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,7 +11,7 @@ import java.util.concurrent.Executors;
 public class QuizRepository {
     private QuizAttemptDao quizAttemptDao;
     private QuestionResponseDao questionResponseDao;
-    private UserDao userDao; // For user tier info if needed directly by repo
+    private UserDao userDao;
     private ExecutorService executorService;
 
     public QuizRepository(Application application) {
@@ -25,9 +22,6 @@ public class QuizRepository {
         executorService = Executors.newSingleThreadExecutor();
     }
 
-    // Insert Quiz Attempt and its Question Responses
-    // This should ideally be in a transaction if Room supported it directly for DAOs with different entities easily.
-    // For simplicity, we insert attempt then responses.
     public void insertQuizAttemptWithResponses(final QuizAttemptEntity attempt, final List<QuestionResponseEntity> responses) {
         executorService.execute(() -> {
             long attemptId = quizAttemptDao.insertQuizAttempt(attempt);
@@ -39,8 +33,6 @@ public class QuizRepository {
         });
     }
 
-    // Get all quiz attempts for a user (for HistoryFragment)
-    // Using LiveData would be better for observing changes, but for Day 1, a simple callback/direct list for now.
     public void getQuizAttemptsForUser(String userId, final OnQuizAttemptsRetrievedListener listener) {
         executorService.execute(() -> {
             List<QuizAttemptEntity> attempts = quizAttemptDao.getQuizAttemptsForUser(Integer.parseInt(userId)); // Assuming userId is passed as String
@@ -144,5 +136,24 @@ public class QuizRepository {
                 }
             });
         });
+    }
+
+    // Method to delete a QuizAttempt
+    public void deleteQuizAttempt(final QuizAttemptEntity quizAttempt, final OnDeletionCompleteListener listener) {
+        executorService.execute(() -> {
+            quizAttemptDao.deleteQuizAttempt(quizAttempt);
+            // Optionally, you can add error handling or check if deletion was successful if needed
+            // For now, we assume it succeeds.
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (listener != null) {
+                    listener.onDeletionComplete();
+                }
+            });
+        });
+    }
+
+    // Callback for deletion completion
+    public interface OnDeletionCompleteListener {
+        void onDeletionComplete();
     }
 } 

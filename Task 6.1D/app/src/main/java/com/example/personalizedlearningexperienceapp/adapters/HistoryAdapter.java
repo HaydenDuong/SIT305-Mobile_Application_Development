@@ -1,16 +1,20 @@
 package com.example.personalizedlearningexperienceapp.adapters;
 
-import android.os.Bundle; // Import Bundle
+import android.app.AlertDialog;
+import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.navigation.Navigation; // Import Navigation
+import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
-import com.example.personalizedlearningexperienceapp.fragments.QuizAttemptDetailFragment; // Import for ARG_QUIZ_ATTEMPT_ID
+import com.example.personalizedlearningexperienceapp.data.QuizRepository;
+import com.example.personalizedlearningexperienceapp.fragments.QuizAttemptDetailFragment;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -21,22 +25,28 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
 
     private List<QuizAttemptEntity> quizAttempts;
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+    private final Context context;
 
-    // Click listener interface (optional but good practice if you need more complex clicks later)
-    public interface OnItemClickListener {
-        void onItemClick(QuizAttemptEntity attempt);
+    // Click listener interface
+    //public interface OnItemClickListener {
+    //    void onItemClick(QuizAttemptEntity attempt);
+    //}
+    //private OnItemClickListener listener;
+
+    public interface OnDeleteInteractionListener {
+        void onDeleteAttemptClicked(QuizAttemptEntity attempt);
     }
-    private OnItemClickListener listener; // Remove if not using the interface pattern right now
+    private OnDeleteInteractionListener deleteListener;
 
-    // Constructor can be updated if you use the interface
-    public HistoryAdapter(List<QuizAttemptEntity> quizAttempts) {
+    public HistoryAdapter(Context context, List<QuizAttemptEntity> quizAttempts, OnDeleteInteractionListener deleteListener) {
+        this.context = context;
         this.quizAttempts = quizAttempts;
+        this.deleteListener = deleteListener;
     }
 
-    // Optional: setter for a more decoupled click listener
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
-    }
+    //public void setOnItemClickListener(OnItemClickListener listener) {
+    //    this.listener = listener;
+    //}
 
 
     @NonNull
@@ -51,25 +61,32 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         QuizAttemptEntity attempt = quizAttempts.get(position);
         holder.topicName.setText(attempt.topicName);
         holder.date.setText(dateFormat.format(new Date(attempt.timestamp)));
-        // String scoreText = "Score: " + attempt.correctAnswers + "/" + attempt.totalQuestions; // Kept your original formatting
-        // Using string resource for "Score: %1$d/%2$d" format
         String scoreText = holder.itemView.getContext().getString(R.string.history_item_score_format, attempt.correctAnswers, attempt.totalQuestions);
         holder.score.setText(scoreText);
 
         // Set click listener on the itemView
         holder.itemView.setOnClickListener(view -> {
-            // If using the listener interface pattern:
-            // if (listener != null) {
-            //    listener.onItemClick(attempt);
-            // } else {
-            // Direct navigation:
             Bundle bundle = new Bundle();
             bundle.putInt(QuizAttemptDetailFragment.ARG_QUIZ_ATTEMPT_ID, attempt.id);
             Navigation.findNavController(view).navigate(
                     R.id.action_historyFragment_to_quizAttemptDetailFragment,
                     bundle
             );
-            // }
+        });
+
+        // Click listener for the delete button
+        holder.deleteButton.setOnClickListener(view -> {
+            if (deleteListener != null) {
+                new AlertDialog.Builder(context)
+                        .setTitle("Delete Quiz Attempt")
+                        .setMessage("Are you sure you want to delete this quiz attempt? This action cannot be undone.")
+                        .setPositiveButton(android.R.string.yes, (dialog, which) -> {
+                            deleteListener.onDeleteAttemptClicked(attempt);
+                        })
+                        .setNegativeButton(android.R.string.no, null)
+                        .setIcon(R.drawable.ic_delete) // Make sure ic_delete is in your drawables
+                        .show();
+            }
         });
     }
 
@@ -79,8 +96,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     }
 
     public void updateData(List<QuizAttemptEntity> newAttempts) {
-        // Your existing updateData logic is fine.
-        // For a more robust update, consider using DiffUtil if lists get very large.
         this.quizAttempts.clear();
         if (newAttempts != null) {
             this.quizAttempts.addAll(newAttempts);
@@ -92,13 +107,15 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         TextView topicName;
         TextView date;
         TextView score;
+        ImageButton deleteButton;
 
         ViewHolder(View itemView) {
             super(itemView);
-            // Ensure these IDs match your item_quiz_attempt.xml
-            topicName = itemView.findViewById(R.id.textViewHistoryItemTopicName);
+
+            topicName = itemView.findViewById(R.id.textViewHistoryItemTopic);
             date = itemView.findViewById(R.id.textViewHistoryItemDate);
             score = itemView.findViewById(R.id.textViewHistoryItemScore);
+            deleteButton = itemView.findViewById(R.id.imageButtonDeleteAttempt);
         }
     }
 }

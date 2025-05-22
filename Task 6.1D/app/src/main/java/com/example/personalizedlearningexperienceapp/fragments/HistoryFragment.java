@@ -19,14 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.adapters.HistoryAdapter;
-
-// Import SignUpFragment to access its public constants for SharedPreferences
-
+import com.example.personalizedlearningexperienceapp.models.HistoryViewModel;
+import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
 
 
 import java.util.ArrayList;
 
-public class HistoryFragment extends Fragment {
+public class HistoryFragment extends Fragment implements HistoryAdapter.OnDeleteInteractionListener {
 
     private HistoryViewModel historyViewModel;
     private RecyclerView recyclerViewHistory;
@@ -46,8 +45,7 @@ public class HistoryFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_history, container, false);
     }
 
@@ -58,7 +56,6 @@ public class HistoryFragment extends Fragment {
 
         recyclerViewHistory = view.findViewById(R.id.recyclerViewHistory);
         buttonGoToDashboard = view.findViewById(R.id.buttonGoToDashboard);
-        // Assuming textViewNoHistory ID exists in fragment_history.xml, otherwise this will be null
         textViewNoHistory = view.findViewById(R.id.textViewNoHistory);
 
 
@@ -87,24 +84,27 @@ public class HistoryFragment extends Fragment {
             currentUserIdForRepo = null; // Or handle as an error state
         }
 
-
-        if (currentUserIdForRepo != null) { // Only observe if we have a valid user to fetch for
-            historyViewModel.getQuizAttemptsLiveData().observe(getViewLifecycleOwner(), attempts -> {
-                if (attempts != null && !attempts.isEmpty()) {
-                    historyAdapter.updateData(attempts);
-                    recyclerViewHistory.setVisibility(View.VISIBLE);
-                    if (textViewNoHistory != null) textViewNoHistory.setVisibility(View.GONE);
-                } else {
-                    Log.d("HistoryFragment", "No quiz attempts found or list is empty for user: " + currentUserIdForRepo);
-                    recyclerViewHistory.setVisibility(View.GONE);
-                    if (textViewNoHistory != null) {
-                        textViewNoHistory.setText(getString(R.string.history_no_quizzes_prompt)); // Using string resource
-                        textViewNoHistory.setVisibility(View.VISIBLE);
+        historyViewModel.getQuizAttemptsLiveData().observe(getViewLifecycleOwner(), attempts -> {
+            if (attempts != null && !attempts.isEmpty()) {
+                historyAdapter.updateData(attempts);
+                recyclerViewHistory.setVisibility(View.VISIBLE);
+                if (textViewNoHistory != null) textViewNoHistory.setVisibility(View.GONE);
+            } else {
+                // If attempts is null or empty, show appropriate message
+                recyclerViewHistory.setVisibility(View.GONE);
+                if (textViewNoHistory != null) {
+                    // Re-check current user status to display correct message
+                    SharedPreferences recheckPrefs = requireActivity().getSharedPreferences(SignUpFragment.PREFS_NAME, Context.MODE_PRIVATE);
+                    int recheckUserIdInt = recheckPrefs.getInt(SignUpFragment.KEY_USER_ID, SignUpFragment.DEFAULT_USER_ID);
+                    if (recheckUserIdInt == SignUpFragment.DEFAULT_USER_ID) {
+                        textViewNoHistory.setText(getString(R.string.history_login_prompt));
+                    } else {
+                        textViewNoHistory.setText(getString(R.string.history_no_quizzes_prompt));
                     }
+                    textViewNoHistory.setVisibility(View.VISIBLE);
                 }
-            });
-        }
-
+            }
+        });
 
         buttonGoToDashboard.setOnClickListener(v -> {
             if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.historyFragment) {
@@ -115,7 +115,14 @@ public class HistoryFragment extends Fragment {
 
     private void setupRecyclerView() {
         recyclerViewHistory.setLayoutManager(new LinearLayoutManager(getContext()));
-        historyAdapter = new HistoryAdapter(new ArrayList<>());
+        historyAdapter = new HistoryAdapter(requireContext(), new ArrayList<>(), this);
         recyclerViewHistory.setAdapter(historyAdapter);
+    }
+
+    @Override
+    public void onDeleteAttemptClicked(QuizAttemptEntity attempt) {
+        if (historyViewModel != null && attempt != null) {
+            historyViewModel.deleteQuizAttempt(attempt);
+        }
     }
 }

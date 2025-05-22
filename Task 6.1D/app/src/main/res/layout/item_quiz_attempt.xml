@@ -12,35 +12,57 @@
     app:cardCornerRadius="8dp"
     app:cardElevation="2dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="12dp">
 
         <TextView
-            android:id="@+id/textViewHistoryItemTopicName"
-            android:layout_width="match_parent"
+            android:id="@+id/textViewHistoryItemTopic"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceSubtitle1"
             android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageButtonDeleteAttempt"
+            app:layout_constraintHorizontal_bias="0.0"
             tools:text="Mathematics Quiz" />
 
         <TextView
             android:id="@+id/textViewHistoryItemDate"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceCaption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewHistoryItemTopic"
+            app:layout_constraintEnd_toStartOf="@+id/imageButtonDeleteAttempt"
             tools:text="2023-10-27 10:30 AM" />
 
         <TextView
             android:id="@+id/textViewHistoryItemScore"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:textAppearance="?attr/textAppearanceCaption"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/textViewHistoryItemDate"
+            app:layout_constraintEnd_toStartOf="@+id/imageButtonDeleteAttempt"
+            app:layout_constraintBottom_toBottomOf="parent"
             tools:text="Score: 8/10" />
 
-    </LinearLayout>
+        <ImageButton
+            android:id="@+id/imageButtonDeleteAttempt"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_delete"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="Delete Quiz Attempt"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:padding="8dp"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
