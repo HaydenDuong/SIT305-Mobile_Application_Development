@@ -14,5 +14,6 @@ public interface QuizAttemptDao {
     @Query("SELECT * FROM quiz_attempts WHERE userId = :userId ORDER BY timestamp DESC")
     List<QuizAttemptEntity> getQuizAttemptsForUser(int userId);
 
-    // Add other queries as needed
+    @Query("SELECT * FROM quiz_attempts WHERE id = :attemptId")
+    QuizAttemptEntity getAttemptById(int attemptId);
 } 

@@ -26,6 +26,22 @@
         <action
             android:id="@+id/action_historyFragment_to_dashboardFragment"
             app:destination="@id/dashboardFragment" />
+        <action
+            android:id="@+id/action_historyFragment_to_quizAttemptDetailFragment"
+            app:destination="@id/quizAttemptDetailFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/quizAttemptDetailFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.QuizAttemptDetailFragment"
+        android:label="Quiz Attempt Details"
+        tools:layout="@layout/fragment_quiz_attempt_detail">
+        <argument
+            android:name="quiz_attempt_id"
+            app:argType="integer"
+            android:defaultValue="-1" />
     </fragment>
 
     <!-- Upgrade Account Fragment (Placeholder for Day 3 / Day 4) -->

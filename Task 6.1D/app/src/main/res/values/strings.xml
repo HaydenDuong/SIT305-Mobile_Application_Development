@@ -12,7 +12,13 @@
     <string name="back_to_dashboard">Back to Dashboard</string>
     <string name="history_login_prompt">Login to see your history.</string>
     <string name="history_no_quizzes_prompt">No quiz history yet. Take a quiz!</string>
-    <string name="history_loading">Loading history...</string> <!-- Optional -->
+    <string name="history_loading">Loading history...</string>
+    <string name="history_item_score_format">Score: %1$d/%2$d</string>
+    <string name="detail_topic_format">Topic: %1$s</string>
+    <string name="detail_date_format">Date: %1$s</string>
+    <string name="detail_score_format">Score: %1$d / %2$d</string>
+    <string name="detail_toolbar_title_format">Details: %1$s</string>
+    <string name="quiz_attempt_not_found">Quiz attempt not found.</string>
     <plurals name="topics_to_explore_count">
         <item quantity="one">You have %d topic to explore</item>
         <item quantity="other">You have %d topics to explore</item>

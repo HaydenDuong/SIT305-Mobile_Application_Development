@@ -1,6 +1,9 @@
 package com.example.personalizedlearningexperienceapp.data;
 
 import android.app.Application;
+import android.os.Handler;
+import android.os.Looper;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -110,4 +113,36 @@ public class QuizRepository {
         void onUserRetrieved(User user);
     }
 
+    // Callback for a single QuizAttemptEntity
+    public interface QuizAttemptCallback {
+        void onAttemptLoaded(QuizAttemptEntity attempt);
+    }
+
+    // Callback for a list of QuestionResponseEntity
+    public interface QuestionResponsesCallback {
+        void onResponsesLoaded(List<QuestionResponseEntity> responses);
+    }
+
+    public void getQuizAttemptById(final int attemptId, final QuizAttemptCallback callback) {
+        executorService.execute(() -> {
+            final QuizAttemptEntity attempt = quizAttemptDao.getAttemptById(attemptId);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (callback != null) {
+                    callback.onAttemptLoaded(attempt);
+                }
+            });
+        });
+    }
+
+    public void getResponsesForAttempt(final int attemptId, final QuestionResponsesCallback callback) {
+        executorService.execute(() -> {
+            // Assuming your DAO method is getResponsesForQuizAttempt as per your QuestionResponseDao.java
+            final List<QuestionResponseEntity> responses = questionResponseDao.getResponsesForQuizAttempt(attemptId);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (callback != null) {
+                    callback.onResponsesLoaded(responses);
+                }
+            });
+        });
+    }
 } 
