@@ -159,18 +159,49 @@ public class ResultFragment extends Fragment {
 
         List<QuestionResponseEntity> responseEntities = new ArrayList<>();
         for (QuizQuestion question : questionsListFromBundle) {
-            String userAnswer = question.getUserSelectedAnswer(); // ASSUMPTION: QuizQuestion has this method/field
+            String userAnswer = question.getUserSelectedAnswer(); // What user selected
             if (userAnswer == null) userAnswer = ""; // Ensure userAnswer is not null
-            
-            String optionsJson = gson.toJson(question.getOptions()); // Serialize options list to JSON
+
+            String optionsJson = gson.toJson(question.getOptions()); // Serialize options list
+
+            // Debug logging to understand the values
+            String correctAnswer = question.getCorrectAnswer();
+            Log.d("ResultFragment", "Q: " + question.getQuestion());
+            Log.d("ResultFragment", "User Answer: '" + userAnswer + "'");
+            Log.d("ResultFragment", "Correct Answer: '" + correctAnswer + "'");
+
+            // Determine if correct - Improved comparison
+            boolean isCorrect = false;
+
+            // First, try direct comparison (after trimming and ignoring case)
+            if (userAnswer.trim().equalsIgnoreCase(correctAnswer.trim())) {
+                isCorrect = true;
+            }
+
+            // If that fails, check if correctAnswer is a letter (A, B, C, D) and compare with options
+            else if (correctAnswer.trim().matches("[A-Da-d]")) {
+                // Get the index (0 for A, 1 for B, etc.)
+                int index = Character.toUpperCase(correctAnswer.trim().charAt(0)) - 'A';
+
+                // If valid index and we have options
+                List<String> options = question.getOptions();
+                if (index >= 0 && index < options.size()) {
+                    // Compare user's answer with the text of the correct option
+                    String correctOptionText = options.get(index);
+                    isCorrect = userAnswer.trim().equalsIgnoreCase(correctOptionText.trim());
+                    Log.d("ResultFragment", "Letter comparison - Correct option text: '" + correctOptionText + "', isCorrect: " + isCorrect);
+                }
+            }
+
+            Log.d("ResultFragment", "Is answer correct? " + isCorrect);
 
             responseEntities.add(new QuestionResponseEntity(
                     0, // quizAttemptId will be set by Repository after attempt is inserted
                     question.getQuestion(),
                     optionsJson, // Save options as JSON string
                     userAnswer,
-                    question.getCorrectAnswer(),
-                    userAnswer.equals(question.getCorrectAnswer()) // Determine if correct
+                    correctAnswer,
+                    isCorrect // Using our improved comparison
             ));
         }
 
