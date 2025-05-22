@@ -54,6 +54,7 @@ dependencies {
     annotationProcessor(libs.androidx.room.compiler)
 
     implementation(libs.gson)
+    implementation(libs.androidx.cardview)
 
     implementation(libs.material)
 }

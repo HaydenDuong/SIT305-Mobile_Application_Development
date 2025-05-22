@@ -1,5 +1,6 @@
 [versions]
 agp = "8.10.0"
+cardview = "1.0.0"
 converterGson = "2.9.0"
 gson = "2.11.0"
 junit = "4.13.2"
@@ -16,6 +17,7 @@ roomCompiler = "2.7.1"
 roomRuntime = "2.7.1"
 
 [libraries]
+androidx-cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomCompiler" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

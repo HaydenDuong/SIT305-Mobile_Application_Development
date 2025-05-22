@@ -96,9 +96,9 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         ViewHolder(View itemView) {
             super(itemView);
             // Ensure these IDs match your item_quiz_attempt.xml
-            topicName = itemView.findViewById(R.id.textViewItemTopicName);
-            date = itemView.findViewById(R.id.textViewItemDate);
-            score = itemView.findViewById(R.id.textViewItemScore);
+            topicName = itemView.findViewById(R.id.textViewHistoryItemTopicName);
+            date = itemView.findViewById(R.id.textViewHistoryItemDate);
+            score = itemView.findViewById(R.id.textViewHistoryItemScore);
         }
     }
 }
