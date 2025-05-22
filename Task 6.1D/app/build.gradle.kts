@@ -53,5 +53,7 @@ dependencies {
     implementation(libs.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
 
+    implementation(libs.gson)
+
     implementation(libs.material)
 }

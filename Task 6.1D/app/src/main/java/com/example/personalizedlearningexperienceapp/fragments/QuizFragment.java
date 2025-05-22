@@ -166,6 +166,15 @@ public class QuizFragment extends Fragment {
 
         selectedAnswerIndex = buttonIndex;
 
+        // --- Add this section to store the selected answer text ---
+        if (currentQuestionIndex < allQuestionsList.size()) {
+            QuizQuestion currentQuestion = allQuestionsList.get(currentQuestionIndex);
+            if (buttonIndex < currentQuestion.getOptions().size()) {
+                currentQuestion.setUserSelectedAnswer(currentQuestion.getOptions().get(buttonIndex));
+            }
+        }
+        // --- End of added section ---
+
         // Reset all button tints to default first
         for (Button btn : answerButtons) {
             btn.setBackgroundTintList(defaultButtonTintColor); // Or specific default color

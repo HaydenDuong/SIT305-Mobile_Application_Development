@@ -9,6 +9,7 @@ public class DatabaseClient {
 
     private DatabaseClient(Context context) {
         appDatabase = Room.databaseBuilder(context, AppDatabase.class, "personalized_learning_db")
+                .fallbackToDestructiveMigration()
                 .build();
     }
 

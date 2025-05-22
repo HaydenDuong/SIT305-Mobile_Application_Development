@@ -17,4 +17,10 @@ public interface UserDao {
 
     @Query("SELECT * FROM users WHERE id = :userId LIMIT 1")
     User getUserById(int userId);
+
+    @Query("UPDATE users SET currentTier = :newTier WHERE id = :userId")
+    void updateUserTier(int userId, String newTier);
+
+    @Query("SELECT currentTier FROM users WHERE id = :userId")
+    String getCurrentTierByUserId(int userId);
 }

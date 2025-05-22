@@ -16,11 +16,17 @@ public class QuizQuestion implements Parcelable {
     @SerializedName("correct_answer")
     private String correctAnswer;
 
+    // Field to store the user's selected answer for this question
+    // This field will NOT be part of GSON serialization from the API
+    // It will be set by the QuizFragment
+    private String userSelectedAnswer;
+
     // Constructor for Parcelable
     protected QuizQuestion(Parcel in) {
         question = in.readString();
         options = in.createStringArrayList();
         correctAnswer = in.readString();
+        userSelectedAnswer = in.readString(); // Read the new field
     }
 
     // Parcelable Creator
@@ -49,6 +55,15 @@ public class QuizQuestion implements Parcelable {
         return correctAnswer;
     }
 
+    public String getUserSelectedAnswer() {
+        return userSelectedAnswer;
+    }
+
+    // Setter for userSelectedAnswer - to be called from QuizFragment
+    public void setUserSelectedAnswer(String userSelectedAnswer) {
+        this.userSelectedAnswer = userSelectedAnswer;
+    }
+
     // Describe contents (usually returns 0)
     @Override
     public int describeContents() {
@@ -61,12 +76,15 @@ public class QuizQuestion implements Parcelable {
         dest.writeString(question);
         dest.writeStringList(options);
         dest.writeString(correctAnswer);
+        dest.writeString(userSelectedAnswer); // Write the new field
     }
 
     // Default constructor (if needed by other parts of your app, e.g., GSON)
+    // Note: userSelectedAnswer is not part of this constructor as it's set later during quiz interaction
     public QuizQuestion(String question, List<String> options, String correctAnswer) {
         this.question = question;
         this.options = options;
         this.correctAnswer = correctAnswer;
+        this.userSelectedAnswer = null; // Initialize to null or empty
     }
 }

@@ -13,15 +13,29 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-import androidx.recyclerview.widget.LinearLayoutManager; // Import
-import androidx.recyclerview.widget.RecyclerView;       // Import
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.personalizedlearningexperienceapp.R;
-import com.example.personalizedlearningexperienceapp.adapters.ResultAdapter; // Import
-import com.example.personalizedlearningexperienceapp.models.QuizQuestion;    // Import
+import com.example.personalizedlearningexperienceapp.adapters.ResultAdapter;
+import com.example.personalizedlearningexperienceapp.models.QuizQuestion; // Your model from the network/LLM
 
-import java.util.ArrayList; // Import
-import java.util.List;      // Import
+// Room Database imports
+import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
+import com.example.personalizedlearningexperienceapp.data.QuestionResponseEntity;
+import com.example.personalizedlearningexperienceapp.data.QuizRepository;
+// Placeholder for your session/user ID management
+// import com.example.personalizedlearningexperienceapp.utils.SessionManager;
+
+import com.google.gson.Gson; // For serializing options list
+
+import java.util.ArrayList;
+import java.util.List;
+
+// Import SignUpFragment to access its public constants for SharedPreferences
+import com.example.personalizedlearningexperienceapp.fragments.SignUpFragment;
+import android.content.Context; // For SharedPreferences
+import android.content.SharedPreferences; // For SharedPreferences
 
 public class ResultFragment extends Fragment {
 
@@ -29,34 +43,40 @@ public class ResultFragment extends Fragment {
     public static final String ARG_TOTAL_QUESTIONS = "totalQuestions";
     public static final String ARG_TOPIC_NAME = "topicName";
     public static final String ARG_QUESTIONS_LIST = "questionsList";
+    // It seems user's answers are not directly passed. We'll infer them if QuizQuestion holds selected answer.
+    // Or, this data needs to be passed to ResultFragment if it's not part of QuizQuestion model.
+    // For now, I'll assume QuizQuestion might have a field like `userSelectedAnswer` or similar that was set during QuizFragment.
+    // If not, this logic needs adjustment based on how QuizFragment passes answers.
 
     private TextView textViewResultPageTitle;
     private TextView textViewResultTopicName;
     private TextView textViewResultFinalScore;
     private Button buttonResultAction;
-    private RecyclerView recyclerViewResults; // NEW
-    private ResultAdapter resultAdapter;      // NEW
-    private List<QuizQuestion> questionsList = new ArrayList<>(); // Initialize
+    private RecyclerView recyclerViewResults;
+    private ResultAdapter resultAdapter;
+    private List<QuizQuestion> questionsListFromBundle = new ArrayList<>(); // Renamed to avoid confusion
 
     private NavController navController;
+    private QuizRepository quizRepository; // Added
+    private Gson gson = new Gson(); // For serializing options list to JSON string
 
     public ResultFragment() {
         // Required empty public constructor
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) { 
+    public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        quizRepository = new QuizRepository(requireActivity().getApplication()); // Initialize repository
+
         if (getArguments() != null) {
             if (getArguments().containsKey(ARG_QUESTIONS_LIST)) {
-                // Retrieve as ArrayList<Parcelable> first
                 ArrayList<Parcelable> parcelableList = getArguments().getParcelableArrayList(ARG_QUESTIONS_LIST);
                 if (parcelableList != null) {
-                    this.questionsList.clear();
-                    // Iterate and cast each element
+                    this.questionsListFromBundle.clear();
                     for (Parcelable p : parcelableList) {
                         if (p instanceof QuizQuestion) {
-                            this.questionsList.add((QuizQuestion) p);
+                            this.questionsListFromBundle.add((QuizQuestion) p);
                         }
                     }
                 } else {
@@ -81,9 +101,8 @@ public class ResultFragment extends Fragment {
         textViewResultTopicName = view.findViewById(R.id.textViewResultTopicName);
         textViewResultFinalScore = view.findViewById(R.id.textViewResultFinalScore);
         buttonResultAction = view.findViewById(R.id.buttonResultAction);
-        recyclerViewResults = view.findViewById(R.id.recyclerViewResults); // Initialize RecyclerView
+        recyclerViewResults = view.findViewById(R.id.recyclerViewResults);
 
-        // Retrieve other arguments for header
         int score = 0;
         int totalQuestions = 0;
         String topicName = "N/A";
@@ -94,11 +113,12 @@ public class ResultFragment extends Fragment {
             topicName = getArguments().getString(ARG_TOPIC_NAME, "N/A");
         }
 
-        textViewResultPageTitle.setText(getString(R.string.quiz_completed_title)); // You might already have this string
-        textViewResultTopicName.setText(getString(R.string.quiz_results_for_topic_format, topicName)); // You might already have this string
-        textViewResultFinalScore.setText(getString(R.string.your_score_format, score, totalQuestions)); // You might already have this string
+        textViewResultPageTitle.setText(getString(R.string.quiz_completed_title));
+        textViewResultTopicName.setText(getString(R.string.quiz_results_for_topic_format, topicName));
+        textViewResultFinalScore.setText(getString(R.string.your_score_format, score, totalQuestions));
 
         setupRecyclerView();
+        saveQuizResultsToDatabase(score, totalQuestions, topicName);
 
         buttonResultAction.setOnClickListener(v -> {
             if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() == R.id.resultFragment) {
@@ -108,9 +128,53 @@ public class ResultFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        if (getContext() == null) return;
-        resultAdapter = new ResultAdapter(getContext(), questionsList);
+        if (getContext() == null || questionsListFromBundle.isEmpty()) return;
+        resultAdapter = new ResultAdapter(getContext(), questionsListFromBundle);
         recyclerViewResults.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewResults.setAdapter(resultAdapter);
+    }
+
+    private void saveQuizResultsToDatabase(int score, int totalQuestionsBundle, String topicName) {
+        // Get user ID from SharedPreferences
+        SharedPreferences prefs = requireActivity().getSharedPreferences(SignUpFragment.PREFS_NAME, Context.MODE_PRIVATE);
+        int currentUserIdInt = prefs.getInt(SignUpFragment.KEY_USER_ID, SignUpFragment.DEFAULT_USER_ID);
+
+        if (currentUserIdInt == SignUpFragment.DEFAULT_USER_ID) { // Check if actual user ID is valid
+             Log.e("ResultFragment", "Invalid User ID from SharedPreferences. Cannot save results.");
+             return;
+        }
+
+        if (questionsListFromBundle.isEmpty()) {
+            Log.e("ResultFragment", "Questions list is empty. Cannot save results.");
+            return;
+        }
+
+        QuizAttemptEntity attempt = new QuizAttemptEntity(
+                currentUserIdInt, // Use the retrieved int ID
+                topicName,
+                System.currentTimeMillis(),
+                questionsListFromBundle.size(),
+                score
+        );
+
+        List<QuestionResponseEntity> responseEntities = new ArrayList<>();
+        for (QuizQuestion question : questionsListFromBundle) {
+            String userAnswer = question.getUserSelectedAnswer(); // ASSUMPTION: QuizQuestion has this method/field
+            if (userAnswer == null) userAnswer = ""; // Ensure userAnswer is not null
+            
+            String optionsJson = gson.toJson(question.getOptions()); // Serialize options list to JSON
+
+            responseEntities.add(new QuestionResponseEntity(
+                    0, // quizAttemptId will be set by Repository after attempt is inserted
+                    question.getQuestion(),
+                    optionsJson, // Save options as JSON string
+                    userAnswer,
+                    question.getCorrectAnswer(),
+                    userAnswer.equals(question.getCorrectAnswer()) // Determine if correct
+            ));
+        }
+
+        quizRepository.insertQuizAttemptWithResponses(attempt, responseEntities);
+        Log.d("ResultFragment", "Quiz results saved to database for user: " + currentUserIdInt);
     }
 }

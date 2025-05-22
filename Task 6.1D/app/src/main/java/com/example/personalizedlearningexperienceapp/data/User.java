@@ -11,6 +11,7 @@ public class User {
     private String email;
     private String password;
     private String phoneNumber;
+    private String currentTier;
 
     // Constructor
     public User(String username, String email, String password, String phoneNumber) {
@@ -18,6 +19,7 @@ public class User {
         this.email = email;
         this.password = password;
         this.phoneNumber = phoneNumber;
+        this.currentTier = "starter";
     }
 
     // Getters and Setters
@@ -59,5 +61,13 @@ public class User {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public String getCurrentTier() {
+        return currentTier;
+    }
+
+    public void setCurrentTier(String currentTier) {
+        this.currentTier = currentTier;
     }
 }

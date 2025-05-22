@@ -10,6 +10,9 @@
     <string name="back_to_dashboard_button_text">Back to Dashboard</string>
     <string name="your_score_format">Your Score: %1$d / %2$d</string>
     <string name="back_to_dashboard">Back to Dashboard</string>
+    <string name="history_login_prompt">Login to see your history.</string>
+    <string name="history_no_quizzes_prompt">No quiz history yet. Take a quiz!</string>
+    <string name="history_loading">Loading history...</string> <!-- Optional -->
     <plurals name="topics_to_explore_count">
         <item quantity="one">You have %d topic to explore</item>
         <item quantity="other">You have %d topics to explore</item>

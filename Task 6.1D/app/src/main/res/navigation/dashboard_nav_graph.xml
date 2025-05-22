@@ -3,7 +3,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/dashboard_nav_graph"
-    app:startDestination="@id/dashboardFragment">
+    app:startDestination="@id/historyFragment"> <!-- << CHANGED startDestination -->
+
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" > <!-- Assuming you will create fragment_profile.xml on Day 2 -->
+        <action
+            android:id="@+id/action_profileFragment_to_historyFragment"
+            app:destination="@id/historyFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_upgradeAccountFragment"
+            app:destination="@id/upgradeAccountFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.HistoryFragment"
+        android:label="Quiz History"
+        tools:layout="@layout/fragment_history" >
+        <action
+            android:id="@+id/action_historyFragment_to_dashboardFragment"
+            app:destination="@id/dashboardFragment" />
+    </fragment>
+
+    <!-- Upgrade Account Fragment (Placeholder for Day 3 / Day 4) -->
+    <fragment
+        android:id="@+id/upgradeAccountFragment"
+        android:name="com.example.personalizedlearningexperienceapp.fragments.UpgradeAccountFragment"
+        android:label="Upgrade Account"
+        tools:layout="@layout/fragment_upgrade_account" /> <!-- Assuming you will create fragment_upgrade_account.xml later -->
 
     <fragment
         android:id="@+id/dashboardFragment"
@@ -15,7 +45,7 @@
             app:destination="@id/quizFragment" />
         <action
             android:id="@+id/action_dashboardFragment_to_editInterests"
-            app:destination="@id/yourInterestsFragment_in_dashboard" >
+            app:destination="@id/yourInterestsFragment_in_dashboard" > <!-- Re-using your existing ID for this sub-flow -->
             <argument
                 android:name="isEditingMode"
                 app:argType="boolean"
@@ -27,7 +57,7 @@
         android:id="@+id/quizFragment"
         android:name="com.example.personalizedlearningexperienceapp.fragments.QuizFragment"
         android:label="Quiz"
-        tools:layout="@layout/fragment_quiz" > <!-- Assuming layout name -->
+        tools:layout="@layout/fragment_quiz" >
         <action
             android:id="@+id/action_quizFragment_to_resultFragment"
             app:destination="@id/resultFragment" />
@@ -40,12 +70,12 @@
         android:id="@+id/resultFragment"
         android:name="com.example.personalizedlearningexperienceapp.fragments.ResultFragment"
         android:label="Result"
-        tools:layout="@layout/fragment_result" > <!-- Assuming layout name -->
+        tools:layout="@layout/fragment_result" >
         <action
             android:id="@+id/action_resultFragment_to_dashboardFragment"
             app:destination="@id/dashboardFragment"
             app:popUpTo="@id/dashboardFragment"
-            app:popUpToInclusive="true"/> <!-- Go back to dashboard, clear quiz/result from stack -->
+            app:popUpToInclusive="true"/>
     </fragment>
 
     <fragment
@@ -58,4 +88,5 @@
             app:argType="boolean"
             android:defaultValue="true" />
     </fragment>
+
 </navigation>
