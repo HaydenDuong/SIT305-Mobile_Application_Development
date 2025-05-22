@@ -1,4 +1,4 @@
-package com.example.personalizedlearningexperienceapp.models;
+package com.example.personalizedlearningexperienceapp.viewmodels;
 
 import android.app.Application;
 import androidx.annotation.NonNull;

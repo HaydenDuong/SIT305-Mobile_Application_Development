@@ -156,4 +156,16 @@ public class QuizRepository {
     public interface OnDeletionCompleteListener {
         void onDeletionComplete();
     }
+
+    public interface OnUserFetchedListener {
+        void onDataFetched(User user);
+    }
+
+    public interface OnStringFetchedListener {
+        void onDataFetched(String value);
+    }
+
+    public interface OnIntegerFetchedListener {
+        void onDataFetched(Integer value);
+    }
 } 

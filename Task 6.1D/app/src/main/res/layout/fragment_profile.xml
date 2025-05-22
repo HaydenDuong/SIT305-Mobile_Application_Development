@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp"
+    tools:context=".fragments.ProfileFragment">
+
+    <TextView
+        android:id="@+id/textViewProfileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Profile"
+        android:textAppearance="?attr/textAppearanceHeadline5"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <!-- User Information Section -->
+    <TextView
+        android:id="@+id/textViewUsernameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Username:"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/textViewProfileTitle"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewUsername"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="SampleUser"
+        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/textViewUsernameLabel" />
+
+    <TextView
+        android:id="@+id/textViewEmailLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Email:"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/textViewUsername"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewEmail"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="user@example.com"
+        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/textViewEmailLabel" />
+
+    <TextView
+        android:id="@+id/textViewAccountTierLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Account Tier:"
+        android:textStyle="bold"
+        app:layout_constraintTop_toBottomOf="@id/textViewEmail"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewAccountTier"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        tools:text="Starter"
+        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/textViewAccountTierLabel" />
+
+    <!-- Quiz Statistics Section -->
+    <TextView
+        android:id="@+id/textViewStatsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Quiz Statistics"
+        android:textAppearance="?attr/textAppearanceHeadline6"
+        app:layout_constraintTop_toBottomOf="@id/textViewAccountTier"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewTotalQuestionsLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Total Questions Answered:"
+        android:clickable="true"
+        android:focusable="true"
+        android:background="?attr/selectableItemBackground"
+        app:layout_constraintTop_toBottomOf="@id/textViewStatsTitle"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewTotalQuestions"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="150"
+        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        app:layout_constraintTop_toTopOf="@id/textViewTotalQuestionsLabel" />
+
+    <TextView
+        android:id="@+id/textViewCorrectAnswersLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Correct Answers:"
+        app:layout_constraintTop_toBottomOf="@id/textViewTotalQuestions"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewCorrectAnswers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="120"
+        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        app:layout_constraintTop_toTopOf="@id/textViewCorrectAnswersLabel" />
+
+    <TextView
+        android:id="@+id/textViewIncorrectAnswersLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Incorrect Answers:"
+        app:layout_constraintTop_toBottomOf="@id/textViewCorrectAnswers"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textViewIncorrectAnswers"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        tools:text="30"
+        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        app:layout_constraintTop_toTopOf="@id/textViewIncorrectAnswersLabel"/>
+
+    <!-- Guideline for aligning labels and values -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guidelineProfileVertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.6" />
+
+    <!-- Action Buttons -->
+    <Button
+        android:id="@+id/buttonUpgradeAccount"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="Upgrade Account"
+        app:layout_constraintTop_toBottomOf="@id/textViewIncorrectAnswers"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <Button
+        android:id="@+id/buttonShareProfile"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="Share Profile (QR)"
+        app:layout_constraintTop_toBottomOf="@id/buttonUpgradeAccount"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

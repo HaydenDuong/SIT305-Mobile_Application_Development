@@ -19,7 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.adapters.HistoryAdapter;
-import com.example.personalizedlearningexperienceapp.models.HistoryViewModel;
+import com.example.personalizedlearningexperienceapp.viewmodels.HistoryViewModel;
 import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
 
 

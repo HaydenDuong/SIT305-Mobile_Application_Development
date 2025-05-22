@@ -27,12 +27,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
     private final Context context;
 
-    // Click listener interface
-    //public interface OnItemClickListener {
-    //    void onItemClick(QuizAttemptEntity attempt);
-    //}
-    //private OnItemClickListener listener;
-
     public interface OnDeleteInteractionListener {
         void onDeleteAttemptClicked(QuizAttemptEntity attempt);
     }
@@ -43,11 +37,6 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
         this.quizAttempts = quizAttempts;
         this.deleteListener = deleteListener;
     }
-
-    //public void setOnItemClickListener(OnItemClickListener listener) {
-    //    this.listener = listener;
-    //}
-
 
     @NonNull
     @Override
