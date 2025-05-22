@@ -5,4 +5,6 @@
     <color name="topic_selected_background">#D1C4E9</color>
     <color name="topic_default_background">#F5F5F5</color>
     <color name="topic_text_color">#000000</color>
+    <color name="correct_answer_color">#4CAF50</color>
+    <color name="incorrect_answer_color">#F44336</color>
 </resources>

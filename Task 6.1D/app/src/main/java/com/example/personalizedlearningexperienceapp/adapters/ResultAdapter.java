@@ -49,19 +49,29 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultView
     class ResultViewHolder extends RecyclerView.ViewHolder {
         private final TextView textViewQuestionNumberAndText;
         private final TextView textViewCorrectAnswerText;
-        // private final TextView textViewCorrectAnswerLabel; // Already in XML, no need for separate field unless styling it dynamically
+        private final TextView textViewYourAnswerText;
+        private final TextView textViewYourAnswerLabel;
 
         public ResultViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewQuestionNumberAndText = itemView.findViewById(R.id.textViewResultItemQuestionNumberAndText);
             textViewCorrectAnswerText = itemView.findViewById(R.id.textViewResultItemCorrectAnswerText);
-            // textViewCorrectAnswerLabel = itemView.findViewById(R.id.textViewResultItemCorrectAnswerLabel);
+            textViewYourAnswerText = itemView.findViewById(R.id.textViewResultItemYourAnswerText);
+            textViewYourAnswerLabel = itemView.findViewById(R.id.textViewResultItemYourAnswerLabel);
         }
 
         public void bind(QuizQuestion question, int questionNumber) {
             textViewQuestionNumberAndText.setText(questionNumber + ". " + question.getQuestion());
 
-            // Determine the actual correct answer text from the options
+            // Get User's Selected Answer Text
+            // In QuizFragment, we likely store the full text of the selected answer in userSelectedAnswer
+            String userSelectedAnswerFullText = question.getUserSelectedAnswer();
+            if (userSelectedAnswerFullText == null || userSelectedAnswerFullText.isEmpty()) {
+                userSelectedAnswerFullText = "Not answered";
+            }
+            textViewYourAnswerText.setText(userSelectedAnswerFullText);
+
+            // Get Correct Answer Text
             String correctAnswerLetter = question.getCorrectAnswer().trim().toUpperCase();
             int correctAnswerIndex = -1;
             switch (correctAnswerLetter) {
@@ -71,12 +81,22 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultView
                 case "D": correctAnswerIndex = 3; break;
             }
 
+            String correctAnswerFullText = "N/A (Error parsing correct answer letter: " + correctAnswerLetter + ")";
             if (correctAnswerIndex != -1 && correctAnswerIndex < question.getOptions().size()) {
-                textViewCorrectAnswerText.setText(question.getOptions().get(correctAnswerIndex));
+                correctAnswerFullText = question.getOptions().get(correctAnswerIndex);
+            }
+            textViewCorrectAnswerText.setText(correctAnswerFullText);
+
+            // Visually distinguish correct vs incorrect user answer
+            // Now compare the full text of the user's answer with the full text of the correct option
+            if (userSelectedAnswerFullText.equals(correctAnswerFullText) && !userSelectedAnswerFullText.equals("Not answered")) {
+                // User's answer is correct
+                textViewYourAnswerText.setTextColor(itemView.getContext().getColor(R.color.correct_answer_color));
+                textViewYourAnswerLabel.setTextColor(itemView.getContext().getColor(R.color.correct_answer_color));
             } else {
-                // Fallback or if the letter is not A, B, C, D or index is out of bounds
-                // This might happen if the LLM response for ANS: is unusual
-                textViewCorrectAnswerText.setText("N/A (Error parsing correct answer: " + correctAnswerLetter + ")");
+                // User's answer is incorrect or not answered
+                textViewYourAnswerText.setTextColor(itemView.getContext().getColor(R.color.incorrect_answer_color));
+                textViewYourAnswerLabel.setTextColor(itemView.getContext().getColor(R.color.incorrect_answer_color));
             }
         }
     }

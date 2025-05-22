@@ -41,6 +41,23 @@
             android:textAppearance="?attr/textAppearanceBody2"
             tools:text="To carry out metabolic processes throughout the body." />
 
+        <TextView
+            android:id="@+id/textViewResultItemYourAnswerLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Your Answer:"
+            android:textAppearance="?attr/textAppearanceCaption"
+            android:textColor="?attr/colorError" />
+
+        <TextView
+            android:id="@+id/textViewResultItemYourAnswerText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?attr/textAppearanceBody2"
+            android:textColor="?attr/colorError"
+            tools:text="The powerhouse of the cell." />
+
     </LinearLayout>
 
 </androidx.cardview.widget.CardView>
