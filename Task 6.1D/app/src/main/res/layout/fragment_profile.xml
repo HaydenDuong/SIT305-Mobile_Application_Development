@@ -4,170 +4,308 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     tools:context=".fragments.ProfileFragment">
 
     <TextView
         android:id="@+id/textViewProfileTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
         android:text="User Profile"
-        android:textAppearance="?attr/textAppearanceHeadline5"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- User Information Section -->
-    <TextView
-        android:id="@+id/textViewUsernameLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Username:"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/textViewProfileTitle"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textViewUsername"
+    <!-- User Info Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewUserInfo"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        tools:text="SampleUser"
-        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="16dp"
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/textViewUsernameLabel" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewProfileTitle">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username:"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textViewUsername"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="username"
+                    android:textColor="#000000"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email:"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textViewEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="email@example.com"
+                    android:textColor="#000000"
+                    android:textSize="16sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Account Tier:"
+                    android:textColor="#000000"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/textViewAccountTier"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="Starter"
+                    android:textColor="#000000"
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Stats section header -->
     <TextView
-        android:id="@+id/textViewEmailLabel"
+        android:id="@+id/textViewStatsHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Email:"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/textViewUsername"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textViewEmail"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        tools:text="user@example.com"
-        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/textViewEmailLabel" />
-
-    <TextView
-        android:id="@+id/textViewAccountTierLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Account Tier:"
-        android:textStyle="bold"
-        app:layout_constraintTop_toBottomOf="@id/textViewEmail"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/textViewAccountTier"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        tools:text="Starter"
-        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="@id/textViewAccountTierLabel" />
-
-    <!-- Quiz Statistics Section -->
-    <TextView
-        android:id="@+id/textViewStatsTitle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="16dp"
         android:text="Quiz Statistics"
-        android:textAppearance="?attr/textAppearanceHeadline6"
-        app:layout_constraintTop_toBottomOf="@id/textViewAccountTier"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="@+id/cardViewUserInfo"
+        app:layout_constraintTop_toBottomOf="@+id/cardViewUserInfo" />
 
-    <TextView
-        android:id="@+id/textViewTotalQuestionsLabel"
-        android:layout_width="wrap_content"
+    <!-- Stats Cards Row -->
+    <LinearLayout
+        android:id="@+id/linearLayoutStatsRow"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Total Questions Answered:"
-        android:clickable="true"
-        android:focusable="true"
-        android:background="?attr/selectableItemBackground"
-        app:layout_constraintTop_toBottomOf="@id/textViewStatsTitle"
-        app:layout_constraintStart_toStartOf="parent" />
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="@+id/cardViewUserInfo"
+        app:layout_constraintStart_toStartOf="@+id/cardViewUserInfo"
+        app:layout_constraintTop_toBottomOf="@+id/textViewStatsHeader">
 
-    <TextView
-        android:id="@+id/textViewTotalQuestions"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="150"
-        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
-        app:layout_constraintTop_toTopOf="@id/textViewTotalQuestionsLabel" />
+        <!-- Total Questions Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewTotalQuestions"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
 
-    <TextView
-        android:id="@+id/textViewCorrectAnswersLabel"
-        android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:id="@+id/textViewTotalQuestionsLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Total Questions"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/textViewTotalQuestions"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Correct Answers Card -->
+        <androidx.cardview.widget.CardView
+            android:id="@+id/cardViewCorrectAnswers"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Correctly Answered"
+                    android:textAlignment="center"
+                    android:textColor="#000000"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:id="@+id/textViewCorrectAnswers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+    </LinearLayout>
+
+    <!-- Incorrect Answers Card -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardViewIncorrectAnswers"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="Correct Answers:"
-        app:layout_constraintTop_toBottomOf="@id/textViewTotalQuestions"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:cardCornerRadius="8dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="@+id/linearLayoutStatsRow"
+        app:layout_constraintStart_toStartOf="@+id/linearLayoutStatsRow"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayoutStatsRow">
 
-    <TextView
-        android:id="@+id/textViewCorrectAnswers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="120"
-        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
-        app:layout_constraintTop_toTopOf="@id/textViewCorrectAnswersLabel" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:padding="12dp">
 
-    <TextView
-        android:id="@+id/textViewIncorrectAnswersLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Incorrect Answers:"
-        app:layout_constraintTop_toBottomOf="@id/textViewCorrectAnswers"
-        app:layout_constraintStart_toStartOf="parent" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/textViewIncorrectAnswers"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        tools:text="30"
-        app:layout_constraintStart_toEndOf="@id/guidelineProfileVertical"
-        app:layout_constraintTop_toTopOf="@id/textViewIncorrectAnswersLabel"/>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Incorrect Answers"
+                    android:textColor="#000000"
+                    android:textSize="14sp" />
 
-    <!-- Guideline for aligning labels and values -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guidelineProfileVertical"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.6" />
+                <TextView
+                    android:id="@+id/textViewIncorrectAnswers"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="0"
+                    android:textColor="#000000"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
-    <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:background="#E3F2FD"
+                android:orientation="vertical"
+                android:padding="8dp">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Recommended tip:"
+                    android:textColor="#2196F3"
+                    android:textSize="12sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:text="Upgrade to get a summary of your incorrect answers"
+                    android:textColor="#000000"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+    <!-- Buttons at the bottom -->
     <Button
         android:id="@+id/buttonUpgradeAccount"
-        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
-        android:text="Upgrade Account"
-        app:layout_constraintTop_toBottomOf="@id/textViewIncorrectAnswers"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:backgroundTint="#2196F3"
+        android:text="UPGRADE ACCOUNT"
+        app:layout_constraintEnd_toEndOf="@+id/cardViewIncorrectAnswers"
+        app:layout_constraintStart_toStartOf="@+id/cardViewIncorrectAnswers"
+        app:layout_constraintTop_toBottomOf="@+id/cardViewIncorrectAnswers" />
 
     <Button
         android:id="@+id/buttonShareProfile"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
+        android:backgroundTint="#4CAF50"
         android:text="Share Profile (QR)"
-        app:layout_constraintTop_toBottomOf="@id/buttonUpgradeAccount"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/buttonUpgradeAccount"
+        app:layout_constraintStart_toStartOf="@+id/buttonUpgradeAccount"
+        app:layout_constraintTop_toBottomOf="@+id/buttonUpgradeAccount" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
