@@ -99,6 +99,13 @@ public class ProfileFragment extends Fragment {
         observeViewModel();
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        // Refresh the data when returning to this fragment
+        profileViewModel.loadProfileData();
+    }
+
     private void observeViewModel() {
         // Observe LiveData from ProfileViewModel
         profileViewModel.getUserLiveData().observe(getViewLifecycleOwner(), user -> {

@@ -47,13 +47,16 @@ public class ProfileViewModel extends AndroidViewModel {
     public LiveData<Integer> getCorrectAnswersLiveData() { return correctAnswersLiveData; }
     public LiveData<Integer> getIncorrectAnswersLiveData() { return incorrectAnswersLiveData; }
 
-    private void recalculateIncorrectAnswers() {
+    private void calculateIncorrectAnswers() {
         Integer total = totalQuestionsAnsweredLiveData.getValue();
         Integer correct = correctAnswersLiveData.getValue();
 
+        Log.d("ProfileViewModel", "Calculating incorrect answers - Total: " + total + ", Correct: " + correct);
+
         if (total != null && correct != null) {
-            // Make sure we never have negative incorrect answers
-            incorrectAnswersLiveData.postValue(Math.max(0, total - correct));
+            int incorrect = Math.max(0, total - correct);
+            Log.d("ProfileViewModel", "Setting incorrect answers to: " + incorrect);
+            incorrectAnswersLiveData.setValue(incorrect); // Use setValue instead of postValue for immediate update
         }
     }
 
@@ -70,6 +73,8 @@ public class ProfileViewModel extends AndroidViewModel {
             return;
         }
 
+        final String userId = currentUserId;
+
         // Fetch User details
         quizRepository.getUser(currentUserId, user -> {
             userLiveData.postValue(user); // User object contains username, email
@@ -83,20 +88,16 @@ public class ProfileViewModel extends AndroidViewModel {
         // Fetch Total Questions Answered
         quizRepository.getTotalQuestionsAnswered(currentUserId, total -> {
             totalQuestionsAnsweredLiveData.postValue(total);
-            Integer correct = correctAnswersLiveData.getValue();
-            if (correct != null) {
-                incorrectAnswersLiveData.postValue(total - correct);
-            }
-        });
 
-        // Fetch Correct Answers
-        quizRepository.getTotalCorrectAnswers(currentUserId, correct -> {
-            correctAnswersLiveData.postValue(correct);
-            // Calculate incorrect answers once both total and correct are fetched
-            Integer total = totalQuestionsAnsweredLiveData.getValue();
-            if (total != null) {
-                incorrectAnswersLiveData.postValue(total - correct);
-            }
+            // Try to calculate after total is updated
+            quizRepository.getTotalCorrectAnswers(userId, correct -> {
+                correctAnswersLiveData.postValue(correct);
+
+                // Explicitly calculate incorrect answers after we have both values
+                int incorrect = Math.max(0, total - correct);
+                incorrectAnswersLiveData.postValue(incorrect);
+                Log.d("ProfileViewModel", "Direct calculation - Total: " + total + ", Correct: " + correct + ", Incorrect: " + incorrect);
+            });
         });
     }
 }
