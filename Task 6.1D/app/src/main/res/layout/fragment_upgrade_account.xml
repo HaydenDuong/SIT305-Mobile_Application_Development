@@ -8,7 +8,6 @@
     android:background="#F5F5F5"
     tools:context=".fragments.UpgradeAccountFragment">
 
-
     <TextView
         android:id="@+id/textViewUpgradeTitle"
         android:layout_width="wrap_content"
