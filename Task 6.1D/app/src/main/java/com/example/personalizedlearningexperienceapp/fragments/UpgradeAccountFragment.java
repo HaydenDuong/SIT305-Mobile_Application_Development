@@ -48,8 +48,6 @@ import com.google.android.gms.common.api.CommonStatusCodes;
 public class UpgradeAccountFragment extends Fragment {
 
     private static final String TAG = "UpgradeAccountFragment";
-    // private static final int LOAD_PAYMENT_DATA_REQUEST_CODE = 991; // Deprecated
-
     private NavController navController;
     private Button buttonPurchaseStarter, buttonPurchaseIntermediate, buttonPurchaseAdvanced;
     private PaymentsClient paymentsClient;
@@ -263,37 +261,40 @@ public class UpgradeAccountFragment extends Fragment {
         paymentDataRequest.put("apiVersion", 2);
         paymentDataRequest.put("apiVersionMinor", 0);
 
-        // Define payment methods
-        JSONArray allowedPaymentMethods = new JSONArray();
+        JSONObject merchantInfo = new JSONObject();
+        merchantInfo.put("merchantName", "Personalized Learning Experience"); 
+        paymentDataRequest.put("merchantInfo", merchantInfo);
+
         JSONObject cardPaymentMethod = new JSONObject();
         cardPaymentMethod.put("type", "CARD");
+        JSONObject cardParameters = new JSONObject();
+        cardParameters.put("allowedAuthMethods", new JSONArray().put("PAN_ONLY").put("CRYPTOGRAM_3DS"));
+        cardParameters.put("allowedCardNetworks", new JSONArray().put("AMEX").put("DISCOVER").put("MASTERCARD").put("VISA"));
+        cardPaymentMethod.put("parameters", cardParameters);
 
-        JSONObject parameters = new JSONObject();
-        parameters.put("allowedAuthMethods", new JSONArray()
-                .put("PAN_ONLY")
-                .put("CRYPTOGRAM_3DS"));
-        parameters.put("allowedCardNetworks", new JSONArray()
-                .put("AMEX")
-                .put("DISCOVER")
-                .put("MASTERCARD")
-                .put("VISA"));
+        JSONObject tokenizationSpec = new JSONObject();
+        tokenizationSpec.put("type", "PAYMENT_GATEWAY");
+        JSONObject tokenizationParams = new JSONObject();
+        tokenizationParams.put("gateway", "example"); // Placeholder for test environment
+        tokenizationParams.put("gatewayMerchantId", "exampleGatewayMerchantId"); // Placeholder
+        tokenizationSpec.put("parameters", tokenizationParams);
+        cardPaymentMethod.put("tokenizationSpecification", tokenizationSpec);
 
-        cardPaymentMethod.put("parameters", parameters);
+        JSONArray allowedPaymentMethods = new JSONArray();
         allowedPaymentMethods.put(cardPaymentMethod);
         paymentDataRequest.put("allowedPaymentMethods", allowedPaymentMethods);
 
-        // Define transaction details
         JSONObject transactionInfo = new JSONObject();
         transactionInfo.put("totalPrice", String.format(Locale.US, "%.2f", price));
         transactionInfo.put("totalPriceStatus", "FINAL");
         transactionInfo.put("currencyCode", "USD");
-
         paymentDataRequest.put("transactionInfo", transactionInfo);
-
-        // Define merchant info
-        JSONObject merchantInfo = new JSONObject();
-        merchantInfo.put("merchantName", "Personalized Learning Experience");
-        paymentDataRequest.put("merchantInfo", merchantInfo);
+        
+        try {
+            Log.d(TAG, "PaymentDataRequest JSON: " + paymentDataRequest.toString(2)); // toString(2) for pretty print
+        } catch (JSONException e) {
+            Log.e(TAG, "Error pretty printing JSON for PaymentDataRequest", e);
+        }
 
         return paymentDataRequest;
     }
