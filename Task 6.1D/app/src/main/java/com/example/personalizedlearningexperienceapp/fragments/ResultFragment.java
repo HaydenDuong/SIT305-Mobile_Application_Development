@@ -15,27 +15,17 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.adapters.ResultAdapter;
-import com.example.personalizedlearningexperienceapp.models.QuizQuestion; // Your model from the network/LLM
-
-// Room Database imports
+import com.example.personalizedlearningexperienceapp.models.QuizQuestion;
 import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
 import com.example.personalizedlearningexperienceapp.data.QuestionResponseEntity;
 import com.example.personalizedlearningexperienceapp.data.QuizRepository;
-// Placeholder for your session/user ID management
-// import com.example.personalizedlearningexperienceapp.utils.SessionManager;
-
-import com.google.gson.Gson; // For serializing options list
-
+import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.List;
-
-// Import SignUpFragment to access its public constants for SharedPreferences
-import com.example.personalizedlearningexperienceapp.fragments.SignUpFragment;
-import android.content.Context; // For SharedPreferences
-import android.content.SharedPreferences; // For SharedPreferences
+import android.content.Context;
+import android.content.SharedPreferences;
 
 public class ResultFragment extends Fragment {
 
@@ -43,10 +33,6 @@ public class ResultFragment extends Fragment {
     public static final String ARG_TOTAL_QUESTIONS = "totalQuestions";
     public static final String ARG_TOPIC_NAME = "topicName";
     public static final String ARG_QUESTIONS_LIST = "questionsList";
-    // It seems user's answers are not directly passed. We'll infer them if QuizQuestion holds selected answer.
-    // Or, this data needs to be passed to ResultFragment if it's not part of QuizQuestion model.
-    // For now, I'll assume QuizQuestion might have a field like `userSelectedAnswer` or similar that was set during QuizFragment.
-    // If not, this logic needs adjustment based on how QuizFragment passes answers.
 
     private TextView textViewResultPageTitle;
     private TextView textViewResultTopicName;
@@ -54,11 +40,11 @@ public class ResultFragment extends Fragment {
     private Button buttonResultAction;
     private RecyclerView recyclerViewResults;
     private ResultAdapter resultAdapter;
-    private List<QuizQuestion> questionsListFromBundle = new ArrayList<>(); // Renamed to avoid confusion
+    private List<QuizQuestion> questionsListFromBundle = new ArrayList<>();
 
     private NavController navController;
     private QuizRepository quizRepository; // Added
-    private Gson gson = new Gson(); // For serializing options list to JSON string
+    private Gson gson = new Gson();
 
     public ResultFragment() {
         // Required empty public constructor
@@ -149,13 +135,7 @@ public class ResultFragment extends Fragment {
             return;
         }
 
-        QuizAttemptEntity attempt = new QuizAttemptEntity(
-                currentUserIdInt, // Use the retrieved int ID
-                topicName,
-                System.currentTimeMillis(),
-                questionsListFromBundle.size(),
-                score
-        );
+        QuizAttemptEntity attempt = new QuizAttemptEntity(currentUserIdInt, topicName, System.currentTimeMillis(), questionsListFromBundle.size(), score);
 
         List<QuestionResponseEntity> responseEntities = new ArrayList<>();
         for (QuizQuestion question : questionsListFromBundle) {
@@ -196,12 +176,12 @@ public class ResultFragment extends Fragment {
             Log.d("ResultFragment", "Is answer correct? " + isCorrect);
 
             responseEntities.add(new QuestionResponseEntity(
-                    0, // quizAttemptId will be set by Repository after attempt is inserted
+                    0,
                     question.getQuestion(),
-                    optionsJson, // Save options as JSON string
+                    optionsJson,
                     userAnswer,
                     correctAnswer,
-                    isCorrect // Using our improved comparison
+                    isCorrect
             ));
         }
 

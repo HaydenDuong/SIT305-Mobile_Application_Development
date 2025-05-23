@@ -25,14 +25,13 @@ public class HistoryViewModel extends AndroidViewModel {
 
     public void fetchQuizAttemptsForUser(String userId) {
         this.currentActiveUserId = userId;
-        if (userId == null) { // Handle case where userId might be null if no user logged in
-            quizAttemptsLiveData.postValue(new java.util.ArrayList<>()); // Post empty list
+        if (userId == null) {
+            quizAttemptsLiveData.postValue(new java.util.ArrayList<>());
             return;
         }
         quizRepository.getQuizAttemptsForUser(userId, new QuizRepository.OnQuizAttemptsRetrievedListener() {
             @Override
             public void onRetrieved(List<QuizAttemptEntity> attempts) {
-                // Post value to LiveData from the background thread callback
                 quizAttemptsLiveData.postValue(attempts);
             }
         });
@@ -44,11 +43,9 @@ public class HistoryViewModel extends AndroidViewModel {
         quizRepository.deleteQuizAttempt(attempt, new QuizRepository.OnDeletionCompleteListener() {
             @Override
             public void onDeletionComplete() {
-                // After deletion, re-fetch attempts for the currentActiveUserId
                 if (currentActiveUserId != null) {
                     fetchQuizAttemptsForUser(currentActiveUserId);
                 } else {
-                    // Fallback or log error: Cannot refresh without a userId
                     quizAttemptsLiveData.postValue(new java.util.ArrayList<>());
                 }
             }

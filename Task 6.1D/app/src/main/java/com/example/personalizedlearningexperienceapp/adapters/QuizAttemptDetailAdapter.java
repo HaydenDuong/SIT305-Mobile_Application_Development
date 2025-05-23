@@ -8,9 +8,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.personalizedlearningexperienceapp.R;
-import com.example.personalizedlearningexperienceapp.data.QuestionResponseEntity; // Room Entity
+import com.example.personalizedlearningexperienceapp.data.QuestionResponseEntity;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken; // For deserializing options list
+import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.ArrayList;
@@ -48,15 +48,14 @@ public class QuizAttemptDetailAdapter extends RecyclerView.Adapter<QuizAttemptDe
 
     public void updateData(List<QuestionResponseEntity> newResponses) {
         this.questionResponses = newResponses;
-        notifyDataSetChanged(); // Consider using DiffUtil for better performance with large lists
+        notifyDataSetChanged();
     }
 
     class DetailViewHolder extends RecyclerView.ViewHolder {
         private final TextView textViewQuestionNumberAndText;
         private final TextView textViewYourAnswerText;
         private final TextView textViewCorrectAnswerText;
-        private final TextView textViewYourAnswerLabel; // For coloring the label
-
+        private final TextView textViewYourAnswerLabel;
         public DetailViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewQuestionNumberAndText = itemView.findViewById(R.id.textViewDetailItemQuestionNumberAndText);
@@ -80,12 +79,10 @@ public class QuizAttemptDetailAdapter extends RecyclerView.Adapter<QuizAttemptDe
             List<String> optionsList = new ArrayList<>();
             try {
                 Type listType = new TypeToken<ArrayList<String>>() {}.getType();
-                // Access field directly for options JSON
                 if (response.options != null && !response.options.isEmpty()) {
                     optionsList = gson.fromJson(response.options, listType);
                 }
             } catch (Exception e) {
-                // Log error or handle malformed JSON
                 android.util.Log.e("QuizAttemptDetailAdapter", "Error parsing options JSON", e);
             }
 

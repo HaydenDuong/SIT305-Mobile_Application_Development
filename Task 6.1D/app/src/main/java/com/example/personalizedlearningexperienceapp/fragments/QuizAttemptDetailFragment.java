@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.adapters.QuizAttemptDetailAdapter;
-import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
 import com.example.personalizedlearningexperienceapp.viewmodels.QuizAttemptDetailViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
 import java.text.SimpleDateFormat;
@@ -31,8 +30,6 @@ public class QuizAttemptDetailFragment extends Fragment {
     private TextView textViewTopicName, textViewDate, textViewScore;
     private MaterialToolbar toolbar;
     private NavController navController;
-
-    // Argument key for quizAttemptId
     public static final String ARG_QUIZ_ATTEMPT_ID = "quiz_attempt_id";
     private int quizAttemptId = -1;
 
@@ -50,8 +47,7 @@ public class QuizAttemptDetailFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_quiz_attempt_detail, container, false);
     }
 
@@ -72,7 +68,6 @@ public class QuizAttemptDetailFragment extends Fragment {
         if (quizAttemptId != -1) {
             viewModel.loadQuizAttemptDetails(quizAttemptId);
         } else {
-            // Handle error: No ID passed
             textViewTopicName.setText("Error: Quiz ID not found.");
         }
 
@@ -81,28 +76,25 @@ public class QuizAttemptDetailFragment extends Fragment {
 
     private void setupToolbar() {
         toolbar.setNavigationOnClickListener(v -> navController.navigateUp());
-        // You can also set the title dynamically if needed, e.g., from quizAttempt LiveData
     }
 
     private void setupRecyclerView() {
         adapter = new QuizAttemptDetailAdapter(requireContext(), new ArrayList<>());
         recyclerViewDetails.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerViewDetails.setAdapter(adapter);
-        recyclerViewDetails.setNestedScrollingEnabled(false); // Good for NestedScrollView
+        recyclerViewDetails.setNestedScrollingEnabled(false);
     }
 
     private void observeViewModel() {
         viewModel.getQuizAttempt().observe(getViewLifecycleOwner(), attempt -> {
             if (attempt != null) {
-                // Direct field access for QuizAttemptEntity
                 textViewTopicName.setText(getString(R.string.detail_topic_format, attempt.topicName));
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                 textViewDate.setText(getString(R.string.detail_date_format, sdf.format(new Date(attempt.timestamp))));
                 textViewScore.setText(getString(R.string.detail_score_format, attempt.correctAnswers, attempt.totalQuestions));
-                // Optionally update toolbar title
                 toolbar.setTitle(getString(R.string.detail_toolbar_title_format, attempt.topicName));
-            } else if (quizAttemptId != -1) { // Only show error if an ID was expected
-                textViewTopicName.setText(R.string.quiz_attempt_not_found); // Use string resource
+            } else if (quizAttemptId != -1) {
+                textViewTopicName.setText(R.string.quiz_attempt_not_found);
             }
         });
 

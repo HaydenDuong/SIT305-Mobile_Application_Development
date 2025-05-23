@@ -76,7 +76,7 @@ public class UpgradeAccountFragment extends Fragment {
 
         // Initialize Google Pay
         Wallet.WalletOptions walletOptions = new Wallet.WalletOptions.Builder()
-                .setEnvironment(WalletConstants.ENVIRONMENT_TEST) // Use ENVIRONMENT_PRODUCTION in real app
+                .setEnvironment(WalletConstants.ENVIRONMENT_TEST)
                 .build();
         paymentsClient = Wallet.getPaymentsClient(requireActivity(), walletOptions);
 
@@ -98,7 +98,7 @@ public class UpgradeAccountFragment extends Fragment {
                         case Activity.RESULT_CANCELED:
                             Toast.makeText(requireContext(), "Payment canceled", Toast.LENGTH_SHORT).show();
                             break;
-                        case AutoResolveHelper.RESULT_ERROR: // This constant is from WalletConstants in older versions or just an int value
+                        case AutoResolveHelper.RESULT_ERROR:
                             Status status = AutoResolveHelper.getStatusFromIntent(data);
                             if (status != null) {
                                 Log.e(TAG, "Payment error: " + status.getStatusMessage() + " Code: " + status.getStatusCode());
@@ -108,7 +108,6 @@ public class UpgradeAccountFragment extends Fragment {
                     }
                 });
 
-        // Check if Google Pay is available
         isReadyToPay();
     }
 
@@ -178,15 +177,12 @@ public class UpgradeAccountFragment extends Fragment {
                         try {
                             boolean result = task1.getResult(ApiException.class);
                             if (!result) {
-                                // Google Pay is not available, disable buttons
                                 Log.w(TAG, "Google Pay is not available.");
                                 disablePaymentButtons();
                             } else {
                                 Log.i(TAG, "Google Pay is available.");
-                                // Optionally enable buttons here if they were disabled by default
                             }
                         } catch (ApiException exception) {
-                            // Error determining readiness to pay
                             Log.e(TAG, "isReadyToPay failed: " + exception.getMessage() + " Status code: " + exception.getStatusCode(), exception);
                             disablePaymentButtons();
                         }

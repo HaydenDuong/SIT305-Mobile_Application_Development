@@ -3,7 +3,6 @@ package com.example.personalizedlearningexperienceapp.data;
 import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
-
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -25,7 +24,6 @@ public class QuizRepository {
     public void insertQuizAttemptWithResponses(final QuizAttemptEntity attempt, final List<QuestionResponseEntity> responses) {
         executorService.execute(() -> {
             long attemptId = quizAttemptDao.insertQuizAttempt(attempt);
-            // Set the attemptId for each response and insert them
             for (QuestionResponseEntity response : responses) {
                 response.quizAttemptId = (int) attemptId;
             }
@@ -84,14 +82,12 @@ public class QuizRepository {
         void onTierRetrieved(String tier);
     }
 
-    // Method to update user tier (will be used on Day 4)
     public void updateUserTier(String userId, String newTier) {
         executorService.execute(() -> {
             userDao.updateUserTier(Integer.parseInt(userId), newTier);
         });
     }
-    
-    // Method to get UserEntity (could be useful for Profile)
+
     public void getUser(String userId, final OnUserRetrievedListener listener) {
         executorService.execute(() -> {
             User user = userDao.getUserById(Integer.parseInt(userId));
@@ -128,7 +124,6 @@ public class QuizRepository {
 
     public void getResponsesForAttempt(final int attemptId, final QuestionResponsesCallback callback) {
         executorService.execute(() -> {
-            // Assuming your DAO method is getResponsesForQuizAttempt as per your QuestionResponseDao.java
             final List<QuestionResponseEntity> responses = questionResponseDao.getResponsesForQuizAttempt(attemptId);
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (callback != null) {
@@ -142,8 +137,6 @@ public class QuizRepository {
     public void deleteQuizAttempt(final QuizAttemptEntity quizAttempt, final OnDeletionCompleteListener listener) {
         executorService.execute(() -> {
             quizAttemptDao.deleteQuizAttempt(quizAttempt);
-            // Optionally, you can add error handling or check if deletion was successful if needed
-            // For now, we assume it succeeds.
             new Handler(Looper.getMainLooper()).post(() -> {
                 if (listener != null) {
                     listener.onDeletionComplete();

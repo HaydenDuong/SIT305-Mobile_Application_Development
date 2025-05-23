@@ -13,9 +13,7 @@ import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.data.QuizAttemptEntity;
-import com.example.personalizedlearningexperienceapp.data.QuizRepository;
 import com.example.personalizedlearningexperienceapp.fragments.QuizAttemptDetailFragment;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -73,7 +71,7 @@ public class HistoryAdapter extends RecyclerView.Adapter<HistoryAdapter.ViewHold
                             deleteListener.onDeleteAttemptClicked(attempt);
                         })
                         .setNegativeButton(android.R.string.no, null)
-                        .setIcon(R.drawable.ic_delete) // Make sure ic_delete is in your drawables
+                        .setIcon(R.drawable.ic_delete)
                         .show();
             }
         });

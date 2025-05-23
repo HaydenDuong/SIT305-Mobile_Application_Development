@@ -84,23 +84,23 @@ public class LoginFragment extends Fragment {
         }
 
         executorService.execute(() -> {
-            User user = userDao.getUserByEmail(username); // Assuming username field is for email
+            User user = userDao.getUserByEmail(username);
 
             final boolean loginSuccess;
             final int userIdToProceedWith;
 
-            if (user != null && user.getPassword().equals(password)) { // Plaintext password check for now
+            if (user != null && user.getPassword().equals(password)) {
                 loginSuccess = true;
                 userIdToProceedWith = user.getId();
             } else {
                 loginSuccess = false;
-                userIdToProceedWith = SignUpFragment.DEFAULT_USER_ID; // Not strictly needed here, but for consistency
+                userIdToProceedWith = SignUpFragment.DEFAULT_USER_ID;
             }
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
                     if (loginSuccess) {
-                        saveUserIdToPrefs(userIdToProceedWith); // Save user ID on successful login
+                        saveUserIdToPrefs(userIdToProceedWith);
                         Toast.makeText(getContext(), "Login Successful!", Toast.LENGTH_SHORT).show();
                         navigateToNextScreen(userIdToProceedWith);
                     } else {

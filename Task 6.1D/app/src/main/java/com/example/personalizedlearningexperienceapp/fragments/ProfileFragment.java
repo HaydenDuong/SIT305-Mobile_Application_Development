@@ -102,12 +102,10 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        // Refresh the data when returning to this fragment
         profileViewModel.loadProfileData();
     }
 
     private void observeViewModel() {
-        // Observe LiveData from ProfileViewModel
         profileViewModel.getUserLiveData().observe(getViewLifecycleOwner(), user -> {
             if (user != null) {
                 textViewUsername.setText(user.getUsername());
@@ -199,7 +197,6 @@ public class ProfileFragment extends Fragment {
     }
 
     private void saveQrCodeToGallery(Bitmap qrBitmap) {
-        // For Android 10+ (Q), use MediaStore API
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ContentValues values = new ContentValues();
             values.put(MediaStore.Images.Media.DISPLAY_NAME, "profile_qr_code_" + System.currentTimeMillis() + ".jpg");
@@ -221,7 +218,6 @@ public class ProfileFragment extends Fragment {
                 e.printStackTrace();
             }
         } else {
-            // For older Android versions
             String savedImagePath = MediaStore.Images.Media.insertImage(
                     requireContext().getContentResolver(),
                     qrBitmap,

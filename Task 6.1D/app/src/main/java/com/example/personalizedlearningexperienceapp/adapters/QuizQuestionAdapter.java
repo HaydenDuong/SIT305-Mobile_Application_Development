@@ -7,13 +7,10 @@ import android.view.ViewGroup;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.models.QuizQuestion;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +19,6 @@ public class QuizQuestionAdapter extends RecyclerView.Adapter<QuizQuestionAdapte
 
     private final List<QuizQuestion> questions;
     private final LayoutInflater inflater;
-    // To store selected answers: Key = question index (position), Value = selected option text
     private final Map<Integer, String> selectedAnswers;
 
     public QuizQuestionAdapter(Context context, List<QuizQuestion> questions) {
@@ -65,15 +61,15 @@ public class QuizQuestionAdapter extends RecyclerView.Adapter<QuizQuestionAdapte
 
         public void bind(final QuizQuestion question, final int position) {
             textViewQuestion.setText(question.getQuestion());
-            radioGroupOptions.removeAllViews(); // Clear old options before adding new ones
-            radioGroupOptions.clearCheck();     // Clear previous selection
+            radioGroupOptions.removeAllViews();
+            radioGroupOptions.clearCheck();
 
             List<String> options = question.getOptions();
             if (options != null) {
                 for (int i = 0; i < options.size(); i++) {
                     RadioButton radioButton = new RadioButton(itemView.getContext());
                     radioButton.setText(options.get(i));
-                    radioButton.setId(View.generateViewId()); // Ensure unique IDs
+                    radioButton.setId(View.generateViewId());
                     radioGroupOptions.addView(radioButton);
 
                     // Restore selection if previously answered
@@ -89,9 +85,6 @@ public class QuizQuestionAdapter extends RecyclerView.Adapter<QuizQuestionAdapte
                 if (selectedRadioButton != null) {
                     selectedAnswers.put(position, selectedRadioButton.getText().toString());
                 } else {
-                    // This case might happen if clearCheck() is called while a listener is active
-                    // or if an invalid ID is somehow checked.
-                    // For safety, you might want to remove the entry or handle as appropriate.
                     selectedAnswers.remove(position);
                 }
             });

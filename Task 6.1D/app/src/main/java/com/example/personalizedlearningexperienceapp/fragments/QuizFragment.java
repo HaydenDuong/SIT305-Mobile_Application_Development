@@ -1,8 +1,7 @@
 package com.example.personalizedlearningexperienceapp.fragments;
 
-import android.content.Context; // Required for ColorStateList if using complex selectors
 import android.content.res.ColorStateList;
-import android.graphics.Color; // For simple color changes, or use ContextCompat
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,30 +11,24 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ProgressBar; // Import ProgressBar
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat; // For accessing colors
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
-
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.api.ApiClient;
 import com.example.personalizedlearningexperienceapp.models.QuizQuestion;
 import com.example.personalizedlearningexperienceapp.models.QuizResponse;
-import com.example.personalizedlearningexperienceapp.fragments.ResultFragment;
-
-
 import java.util.ArrayList;
 import java.util.Arrays; 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -49,12 +42,12 @@ public class QuizFragment extends Fragment {
     // UI Elements
     private TextView textViewQuestionNumber;
     private ProgressBar progressBarQuiz;
-    private TextView textViewQuestionTitle; // Optional
+    private TextView textViewQuestionTitle;
     private TextView textViewQuestionText;
-    private List<Button> answerButtons; // To hold buttonAnswer1, buttonAnswer2, etc.
+    private List<Button> answerButtons;
     private Button buttonAnswer1, buttonAnswer2, buttonAnswer3, buttonAnswer4;
-    private Button buttonQuizAction; // Submit/Next/Done button
-    private ProgressBar progressBarQuizInitialLoading; // For initial API call
+    private Button buttonQuizAction;
+    private ProgressBar progressBarQuizInitialLoading;
 
     private NavController navController;
     private String topicName;
@@ -89,8 +82,7 @@ public class QuizFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_quiz, container, false);
     }
 
@@ -161,36 +153,34 @@ public class QuizFragment extends Fragment {
 
     private void handleAnswerButtonClick(int buttonIndex) {
         if (isAnswerSubmitted) {
-            return; // Do nothing if answer for current question is already submitted
+            return;
         }
 
         selectedAnswerIndex = buttonIndex;
 
-        // --- Add this section to store the selected answer text ---
         if (currentQuestionIndex < allQuestionsList.size()) {
             QuizQuestion currentQuestion = allQuestionsList.get(currentQuestionIndex);
             if (buttonIndex < currentQuestion.getOptions().size()) {
                 currentQuestion.setUserSelectedAnswer(currentQuestion.getOptions().get(buttonIndex));
             }
         }
-        // --- End of added section ---
 
-        // Reset all button tints to default first
+        // Reset all button tints to default
         for (Button btn : answerButtons) {
-            btn.setBackgroundTintList(defaultButtonTintColor); // Or specific default color
+            btn.setBackgroundTintList(defaultButtonTintColor);
         }
         // Highlight the newly selected button
         if (selectedButtonTintColor != null) {
             answerButtons.get(buttonIndex).setBackgroundTintList(selectedButtonTintColor);
-        } else { // Fallback if tint color wasn't loaded
-            answerButtons.get(buttonIndex).setBackgroundColor(Color.LTGRAY); // Example
+        } else {
+            answerButtons.get(buttonIndex).setBackgroundColor(Color.LTGRAY);
         }
     }
 
     private void resetButtonBackgrounds() {
         for (Button btn : answerButtons) {
             btn.setBackgroundTintList(defaultButtonTintColor);
-            btn.setEnabled(true); // Re-enable for next question
+            btn.setEnabled(true);
         }
     }
 
@@ -199,7 +189,7 @@ public class QuizFragment extends Fragment {
         if (progressBarQuizInitialLoading != null) {
             progressBarQuizInitialLoading.setVisibility(View.VISIBLE);
         }
-        setQuizElementsVisibility(View.GONE); // Hide quiz content while loading
+        setQuizElementsVisibility(View.GONE);
         if (buttonQuizAction != null) buttonQuizAction.setEnabled(false);
 
 
@@ -257,7 +247,6 @@ public class QuizFragment extends Fragment {
     private void displayCurrentQuestion() {
         if (allQuestionsList == null || allQuestionsList.isEmpty() || currentQuestionIndex >= allQuestionsList.size()) {
             Log.e(TAG, "Attempted to display question out of bounds or with no questions.");
-            // Potentially navigate to results or show error if this state is reached unexpectedly
             if(allQuestionsList != null && !allQuestionsList.isEmpty()) { 
                 navigateToResults();
             }
@@ -280,7 +269,7 @@ public class QuizFragment extends Fragment {
                 answerButtons.get(i).setText(options.get(i));
                 answerButtons.get(i).setVisibility(View.VISIBLE);
             } else {
-                answerButtons.get(i).setVisibility(View.GONE); // Hide unused buttons
+                answerButtons.get(i).setVisibility(View.GONE);
             }
         }
 
@@ -293,7 +282,7 @@ public class QuizFragment extends Fragment {
 
 
     private void handleQuizActionButtonClick() {
-        if (!isAnswerSubmitted) { // ---- Current state: "Submit" ----
+        if (!isAnswerSubmitted) {
             if (selectedAnswerIndex == -1) {
                 Toast.makeText(getContext(), "Please select an answer.", Toast.LENGTH_SHORT).show();
                 return;
@@ -310,12 +299,10 @@ public class QuizFragment extends Fragment {
                 case "D": correctAnswerActualIndex = 3; break;
                 default:
                     Log.e(TAG, "Invalid correct answer letter from API: " + correctAnswerLetter);
-                    // If the letter is invalid, we can't determine the correct button to highlight green.
-                    // The user's answer will be marked based on selectedAnswerIndex vs an invalid correctAnswerActualIndex.
                     break;
             }
 
-            if (getContext() == null) return; // Ensure fragment is still attached
+            if (getContext() == null) return;
 
             if (selectedAnswerIndex == correctAnswerActualIndex) {
                 score++;
@@ -329,7 +316,7 @@ public class QuizFragment extends Fragment {
                 } else {
                      Log.e(TAG, "Could not highlight correct answer button because correct index was invalid. Index: " + correctAnswerActualIndex + ", Letter: " + correctAnswerLetter);
                 }
-            } // This brace closes the else for 'if (selectedAnswerIndex == correctAnswerActualIndex)'
+            }
 
             // All the following logic belongs to the 'Submit' action, after evaluating the answer
             isAnswerSubmitted = true;
@@ -342,13 +329,12 @@ public class QuizFragment extends Fragment {
             } else {
                 buttonQuizAction.setText(getString(R.string.done_button_text));
             }
-            // End of the 'if (!isAnswerSubmitted)' block
 
-        } else { // This 'else' corresponds to 'if (!isAnswerSubmitted)' -- i.e., button was "Next" or "Done"
+        } else {
             currentQuestionIndex++;
-            if (currentQuestionIndex < allQuestionsList.size()) { // More questions left ("Next")
-                displayCurrentQuestion(); // This will reset isAnswerSubmitted and button text
-            } else { // No more questions ("Done")
+            if (currentQuestionIndex < allQuestionsList.size()) {
+                displayCurrentQuestion();
+            } else {
                 navigateToResults();
             }
         }
@@ -361,7 +347,7 @@ public class QuizFragment extends Fragment {
         bundle.putInt(ResultFragment.ARG_SCORE, score);
         bundle.putInt(ResultFragment.ARG_TOTAL_QUESTIONS, allQuestionsList.size());
         bundle.putString(ResultFragment.ARG_TOPIC_NAME, topicName);
-        // Add the questions list to the bundle
+
         if (allQuestionsList instanceof ArrayList) {
             bundle.putParcelableArrayList(ResultFragment.ARG_QUESTIONS_LIST, (ArrayList<? extends Parcelable>) allQuestionsList);
         } else {
@@ -382,7 +368,7 @@ public class QuizFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // Nullify view references to avoid memory leaks
+
         textViewQuestionNumber = null;
         progressBarQuiz = null;
         textViewQuestionTitle = null;
@@ -397,7 +383,7 @@ public class QuizFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         if (executorService != null && !executorService.isShutdown()) {
-            executorService.shutdownNow(); // Consider shutdownNow for quicker termination
+            executorService.shutdownNow();
         }
     }
 }

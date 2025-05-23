@@ -28,7 +28,7 @@ public class DashboardTopicAdapter extends RecyclerView.Adapter<DashboardTopicAd
 
     public void setTopics(List<UserTopic> topics) {
         this.topics = topics;
-        notifyDataSetChanged(); // Or use DiffUtil for better performance
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -52,19 +52,14 @@ public class DashboardTopicAdapter extends RecyclerView.Adapter<DashboardTopicAd
     // ViewHolder Class
     static class TopicViewHolder extends RecyclerView.ViewHolder {
         private TextView tvTopicTitle;
-        private TextView tvTopicDescription;
-        private ImageView ivArrow; // Optional if needed
 
         public TopicViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTopicTitle = itemView.findViewById(R.id.tv_topic_title);
-            tvTopicDescription = itemView.findViewById(R.id.tv_topic_description);
-            ivArrow = itemView.findViewById(R.id.imageView_arrow);
         }
 
         public void bind(final UserTopic topic, final OnTopicClickListener listener) {
             tvTopicTitle.setText("Quiz on " + topic.getTopic());
-            // You can add more description if needed
 
             itemView.setOnClickListener(v -> {
                 if (listener != null) {

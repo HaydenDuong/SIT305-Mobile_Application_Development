@@ -3,22 +3,15 @@ package com.example.personalizedlearningexperienceapp.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
-import java.util.ArrayList;
 import java.util.List;
 
 public class QuizQuestion implements Parcelable {
     @SerializedName("question")
     private String question;
-
     @SerializedName("options")
     private List<String> options;
-
     @SerializedName("correct_answer")
     private String correctAnswer;
-
-    // Field to store the user's selected answer for this question
-    // This field will NOT be part of GSON serialization from the API
-    // It will be set by the QuizFragment
     private String userSelectedAnswer;
 
     // Constructor for Parcelable
@@ -26,7 +19,7 @@ public class QuizQuestion implements Parcelable {
         question = in.readString();
         options = in.createStringArrayList();
         correctAnswer = in.readString();
-        userSelectedAnswer = in.readString(); // Read the new field
+        userSelectedAnswer = in.readString();
     }
 
     // Parcelable Creator
@@ -59,7 +52,6 @@ public class QuizQuestion implements Parcelable {
         return userSelectedAnswer;
     }
 
-    // Setter for userSelectedAnswer - to be called from QuizFragment
     public void setUserSelectedAnswer(String userSelectedAnswer) {
         this.userSelectedAnswer = userSelectedAnswer;
     }
@@ -76,15 +68,13 @@ public class QuizQuestion implements Parcelable {
         dest.writeString(question);
         dest.writeStringList(options);
         dest.writeString(correctAnswer);
-        dest.writeString(userSelectedAnswer); // Write the new field
+        dest.writeString(userSelectedAnswer);
     }
 
-    // Default constructor (if needed by other parts of your app, e.g., GSON)
-    // Note: userSelectedAnswer is not part of this constructor as it's set later during quiz interaction
     public QuizQuestion(String question, List<String> options, String correctAnswer) {
         this.question = question;
         this.options = options;
         this.correctAnswer = correctAnswer;
-        this.userSelectedAnswer = null; // Initialize to null or empty
+        this.userSelectedAnswer = null;
     }
 }

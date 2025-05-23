@@ -14,7 +14,7 @@ import java.util.List;
 public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultViewHolder> {
 
     private final LayoutInflater inflater;
-    private List<QuizQuestion> questionsList; // List of all questions from the quiz
+    private List<QuizQuestion> questionsList;
 
     public ResultAdapter(Context context, List<QuizQuestion> questionsList) {
         this.inflater = LayoutInflater.from(context);
@@ -63,15 +63,12 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultView
         public void bind(QuizQuestion question, int questionNumber) {
             textViewQuestionNumberAndText.setText(questionNumber + ". " + question.getQuestion());
 
-            // Get User's Selected Answer Text
-            // In QuizFragment, we likely store the full text of the selected answer in userSelectedAnswer
             String userSelectedAnswerFullText = question.getUserSelectedAnswer();
             if (userSelectedAnswerFullText == null || userSelectedAnswerFullText.isEmpty()) {
                 userSelectedAnswerFullText = "Not answered";
             }
             textViewYourAnswerText.setText(userSelectedAnswerFullText);
 
-            // Get Correct Answer Text
             String correctAnswerLetter = question.getCorrectAnswer().trim().toUpperCase();
             int correctAnswerIndex = -1;
             switch (correctAnswerLetter) {
@@ -87,8 +84,6 @@ public class ResultAdapter extends RecyclerView.Adapter<ResultAdapter.ResultView
             }
             textViewCorrectAnswerText.setText(correctAnswerFullText);
 
-            // Visually distinguish correct vs incorrect user answer
-            // Now compare the full text of the user's answer with the full text of the correct option
             if (userSelectedAnswerFullText.equals(correctAnswerFullText) && !userSelectedAnswerFullText.equals("Not answered")) {
                 // User's answer is correct
                 textViewYourAnswerText.setTextColor(itemView.getContext().getColor(R.color.correct_answer_color));

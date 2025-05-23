@@ -9,7 +9,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ToggleButton;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -21,7 +20,6 @@ import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.data.DatabaseClient;
 import com.example.personalizedlearningexperienceapp.data.UserTopic;
 import com.example.personalizedlearningexperienceapp.data.UserTopicDao;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -66,7 +64,7 @@ public class YourInterestsFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_your_interests, container, false);
 
         rvTopics = view.findViewById(R.id.rv_topics);
-        btnNext = view.findViewById(R.id.btn_next); // Assuming this ID, e.g., btn_next or btn_next_interests
+        btnNext = view.findViewById(R.id.btn_next);
 
         if (currentUserId == SignUpFragment.DEFAULT_USER_ID) {
             Toast.makeText(getContext(), "Error: User not identified. Please sign up again.", Toast.LENGTH_LONG).show();
@@ -98,10 +96,10 @@ public class YourInterestsFragment extends Fragment {
 
             if (getActivity() != null) {
                 getActivity().runOnUiThread(() -> {
-                    selectedTopicsList.clear(); // Clear before adding, in case this is called multiple times
+                    selectedTopicsList.clear();
                     selectedTopicsList.addAll(previouslySelectedNames);
                     if (topicAdapter != null) {
-                        topicAdapter.notifyDataSetChanged(); // Refresh the adapter to show selections
+                        topicAdapter.notifyDataSetChanged();
                     }
                 });
             }
@@ -127,7 +125,6 @@ public class YourInterestsFragment extends Fragment {
         }
 
         executorService.execute(() -> {
-            // Clear old topics first if this is a re-selection screen
             userTopicDao.deleteUserTopics(currentUserId);
 
             for (String topic : selectedTopicsList) {
@@ -142,10 +139,8 @@ public class YourInterestsFragment extends Fragment {
                         NavController navController = Navigation.findNavController(getView());
                         
                         if (isEditingMode) {
-                            // If editing mode, pop back to the DashboardFragment
                             navController.popBackStack();
                         } else {
-                            // Initial setup, navigate to DashboardActivity
                             navController.navigate(R.id.action_yourInterestsFragment_to_dashboardActivity);
                         }
                     }
@@ -167,7 +162,6 @@ public class YourInterestsFragment extends Fragment {
         @NonNull
         @Override
         public TopicViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            // Ensure R.layout.item_topic exists and contains a ToggleButton with R.id.toggle_topic
             View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_topic, parent, false);
             return new TopicViewHolder(view);
         }
@@ -175,16 +169,9 @@ public class YourInterestsFragment extends Fragment {
         @Override
         public void onBindViewHolder(@NonNull TopicViewHolder holder, int position) {
             String topic = topics.get(position);
-            // For ToggleButton, you might want to set textOn and textOff if you're not using it as a simple check
-            // Or just set the text directly if the style supports it.
-            // Here, we assume the ToggleButton itself will display the text if set.
             holder.topicToggleButton.setText(topic);
             holder.topicToggleButton.setTextOn(topic); // Ensures text is shown when checked
             holder.topicToggleButton.setTextOff(topic); // Ensures text is shown when unchecked
-
-            // Important: To avoid issues with RecyclerView re-binding, remove previous listener
-            // then set the new one, or manage state more carefully.
-            // For simplicity here, we'll set it directly.
             holder.topicToggleButton.setOnCheckedChangeListener(null); // Clear previous listener
             holder.topicToggleButton.setChecked(selectedTopicsInternal.contains(topic)); // Re-set state before adding listener
 
@@ -205,11 +192,10 @@ public class YourInterestsFragment extends Fragment {
         }
 
         static class TopicViewHolder extends RecyclerView.ViewHolder {
-            ToggleButton topicToggleButton; // Assuming ToggleButton R.id.toggle_topic in item_topic.xml
+            ToggleButton topicToggleButton;
 
             public TopicViewHolder(@NonNull View itemView) {
                 super(itemView);
-                // Ensure your item_topic.xml has a ToggleButton with this ID
                 topicToggleButton = itemView.findViewById(R.id.toggle_topic);
             }
         }

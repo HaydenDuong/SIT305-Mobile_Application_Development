@@ -11,17 +11,14 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.Navigation;
-
 import com.example.personalizedlearningexperienceapp.R;
 import com.example.personalizedlearningexperienceapp.data.DatabaseClient;
 import com.example.personalizedlearningexperienceapp.data.User;
 import com.example.personalizedlearningexperienceapp.data.UserDao;
-
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -32,7 +29,6 @@ public class SignUpFragment extends Fragment {
     private UserDao userDao;
     private ExecutorService executorService;
 
-    // SharedPreferences constants - make them accessible if needed by other classes
     public static final String PREFS_NAME = "UserPrefs";
     public static final String KEY_USER_ID = "userId";
     public static final int DEFAULT_USER_ID = -1; // Represents no user logged in
@@ -49,17 +45,15 @@ public class SignUpFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_sign_up, container, false); // Ensure this layout name is correct
+        View view = inflater.inflate(R.layout.fragment_sign_up, container, false);
 
-        // Assuming these IDs are in your fragment_sign_up.xml
-        etUsername = view.findViewById(R.id.et_username); // Or R.id.et_signup_username
-        etEmail = view.findViewById(R.id.et_email); // Or R.id.et_signup_email
-        etConfirmEmail = view.findViewById(R.id.et_confirm_email); // Or R.id.et_signup_confirm_email
-        etPassword = view.findViewById(R.id.et_password); // Or R.id.et_signup_password
-        etConfirmPassword = view.findViewById(R.id.et_confirm_password); // Or R.id.et_signup_confirm_password
-        etPhoneNumber = view.findViewById(R.id.et_phone_number); // Or R.id.et_signup_phone
-        btnSignUp = view.findViewById(R.id.btn_sign_up); // Or R.id.btn_create_account
-
+        etUsername = view.findViewById(R.id.et_username);
+        etEmail = view.findViewById(R.id.et_email);
+        etConfirmEmail = view.findViewById(R.id.et_confirm_email);
+        etPassword = view.findViewById(R.id.et_password);
+        etConfirmPassword = view.findViewById(R.id.et_confirm_password);
+        etPhoneNumber = view.findViewById(R.id.et_phone_number);
+        btnSignUp = view.findViewById(R.id.btn_sign_up);
         btnSignUp.setOnClickListener(v -> registerUser());
 
         return view;
@@ -104,7 +98,7 @@ public class SignUpFragment extends Fragment {
                 return;
             }
 
-            User newUser = new User(username, email, password, phoneNumber); // Storing plaintext password for now
+            User newUser = new User(username, email, password, phoneNumber);
             long newUserIdLong = userDao.insertUser(newUser);
 
             if (getActivity() != null) {

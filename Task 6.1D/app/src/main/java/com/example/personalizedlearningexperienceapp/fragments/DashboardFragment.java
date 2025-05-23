@@ -178,11 +178,3 @@ public class DashboardFragment extends Fragment implements DashboardTopicAdapter
         }
     }
 }
-
-// --- Add this to res/values/strings.xml for plurals ---
-/*
-<plurals name="topics_to_explore_count">
-    <item quantity="one">You have %d topic to explore</item>
-    <item quantity="other">You have %d topics to explore</item>
-</plurals>
-*/

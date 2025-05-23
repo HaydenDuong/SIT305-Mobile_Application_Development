@@ -35,7 +35,6 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.OnDelete
     private TextView textViewNoHistory;
 
     public HistoryFragment() {
-        // Required empty public constructor
     }
 
     @Override
@@ -69,19 +68,17 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.OnDelete
         if (userIdInt != SignUpFragment.DEFAULT_USER_ID) {
             currentUserIdForRepo = String.valueOf(userIdInt);
             historyViewModel.fetchQuizAttemptsForUser(currentUserIdForRepo);
-            if (textViewNoHistory != null) { // If using a dedicated "loading" text
-                textViewNoHistory.setText("Loading history..."); // Or use a string resource
-                textViewNoHistory.setVisibility(View.VISIBLE);
-            }
-            recyclerViewHistory.setVisibility(View.GONE); // Hide until data is loaded
-        } else {
-            Log.e("HistoryFragment", "No valid user ID found from SharedPreferences. Cannot load history.");
             if (textViewNoHistory != null) {
-                textViewNoHistory.setText(getString(R.string.history_login_prompt)); // Using string resource
+                textViewNoHistory.setText("Loading history...");
                 textViewNoHistory.setVisibility(View.VISIBLE);
             }
             recyclerViewHistory.setVisibility(View.GONE);
-            currentUserIdForRepo = null; // Or handle as an error state
+        } else {
+            if (textViewNoHistory != null) {
+                textViewNoHistory.setText(getString(R.string.history_login_prompt));
+                textViewNoHistory.setVisibility(View.VISIBLE);
+            }
+            recyclerViewHistory.setVisibility(View.GONE);
         }
 
         historyViewModel.getQuizAttemptsLiveData().observe(getViewLifecycleOwner(), attempts -> {
@@ -90,10 +87,8 @@ public class HistoryFragment extends Fragment implements HistoryAdapter.OnDelete
                 recyclerViewHistory.setVisibility(View.VISIBLE);
                 if (textViewNoHistory != null) textViewNoHistory.setVisibility(View.GONE);
             } else {
-                // If attempts is null or empty, show appropriate message
                 recyclerViewHistory.setVisibility(View.GONE);
                 if (textViewNoHistory != null) {
-                    // Re-check current user status to display correct message
                     SharedPreferences recheckPrefs = requireActivity().getSharedPreferences(SignUpFragment.PREFS_NAME, Context.MODE_PRIVATE);
                     int recheckUserIdInt = recheckPrefs.getInt(SignUpFragment.KEY_USER_ID, SignUpFragment.DEFAULT_USER_ID);
                     if (recheckUserIdInt == SignUpFragment.DEFAULT_USER_ID) {
