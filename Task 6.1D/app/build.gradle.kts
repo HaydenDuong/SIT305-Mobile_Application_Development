@@ -49,15 +49,19 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
 
-    // dependencies for Room Database
+    // Dependencies for Room Database
     implementation(libs.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)
 
     implementation(libs.gson)
     implementation(libs.androidx.cardview)
 
+    // QR code integration
     implementation("com.google.zxing:core:3.5.1")
     implementation("com.journeyapps:zxing-android-embedded:4.3.0")
+
+    // Google Pay integration
+    implementation("com.google.android.gms:play-services-wallet:19.4.0")
 
     implementation(libs.material)
 }
