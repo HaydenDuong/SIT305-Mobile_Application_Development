@@ -8,9 +8,9 @@ model = None
 tokenizer = None
 
 
-# MODEL = "meta-llama/Llama-3.2-1B"
+MODEL = "meta-llama/Llama-3.2-1B"
 # MODEL = "google/gemma-3-1b-it"
-MODEL = "meta-llama/Llama-2-7b-chat-hf"
+# MODEL = "meta-llama/Llama-2-7b-chat-hf"
 
 def prepareLlamaBot():
     global model, tokenizer
@@ -61,12 +61,13 @@ def chat():
     parsed_interests = []
     try:
         interest_prompt_template = (
-            "Instruction: From the following user text, extract a list of distinct interests, hobbies, or topics. "
+            "Instruction: Analyze ONLY the following 'User text' to extract distinct interests, hobbies, or topics. "
+            "Do NOT invent or list example interests if none are found in the 'User text'. "
             "Output ONLY a comma-separated list (e.g., books, hiking, programming). "
-            "If no specific interests are evident, output the single word: NONE. "
+            "If no specific interests are evident IN THE PROVIDED 'User text', output the single word: NONE. "
             "Do not add any explanation, numbering, or conversational filler. "
             "User text: '{text}'"
-            "Interests:" # Added a label for the model to fill after
+            "Interests:"
         )
         interest_extraction_prompt = interest_prompt_template.format(text=user_message)
         
@@ -96,19 +97,22 @@ def chat():
         
         print(f"DEBUG - Raw Extracted Interests from LLM: '{extracted_interests_text}'")
 
-        # Normalize the "NONE." case and handle potential empty strings after stripping quotes
-        if extracted_interests_text.upper() == "NONE" or extracted_interests_text.upper() == "NONE.":
-            parsed_interests = [] # Represent "NONE" as an empty list of interests
+        # Handle potential instruction regurgitation if output starts with NONE
+        processed_interests_text = extracted_interests_text
+        if extracted_interests_text.upper().startswith("NONE"):
+            # Take only the first line if it starts with NONE, to discard regurgitated instructions
+            processed_interests_text = extracted_interests_text.split('\n')[0].strip()
+
+        if processed_interests_text.upper() == "NONE" or processed_interests_text.upper() == "NONE.":
+            parsed_interests = [] 
         else:
-            # Remove potential leading/trailing quotes if model adds them
-            if extracted_interests_text.startswith("'") and extracted_interests_text.endswith("'"):
-                extracted_interests_text = extracted_interests_text[1:-1]
-            if extracted_interests_text.startswith("\\\"") and extracted_interests_text.endswith("\\\""):
-                extracted_interests_text = extracted_interests_text[1:-1]
+            if processed_interests_text.startswith("'") and processed_interests_text.endswith("'"):
+                processed_interests_text = processed_interests_text[1:-1]
+            if processed_interests_text.startswith("\\\"") and processed_interests_text.endswith("\\\""):
+                processed_interests_text = processed_interests_text[1:-1]
             
-            # Split and filter, ensuring no empty strings or "NONE" variations are included
             parsed_interests = [
-                interest.strip() for interest in extracted_interests_text.split(',') 
+                interest.strip() for interest in processed_interests_text.split(',') 
                 if interest.strip() and interest.strip().upper() not in ["NONE", "NONE."]
             ]
         
@@ -148,9 +152,12 @@ def chat():
         # More robust cleaning for chat response, especially for leading non-alphanumeric characters
         # This will remove leading periods, spaces, and the replacement characters ()
         cleaned_chat_response = ""
-        for char_index, char_code in enumerate(generated_chat_response):
+        # First, specifically remove all Unicode Replacement Characters (U+FFFD)
+        temp_response = generated_chat_response.replace('\ufffd', '')
+
+        for char_index, char_code in enumerate(temp_response):
             if char_code.isalnum(): # Find the first alphanumeric character
-                cleaned_chat_response = generated_chat_response[char_index:]
+                cleaned_chat_response = temp_response[char_index:]
                 break
         else: # If no alphanumeric characters found (e.g., all are or spaces)
             cleaned_chat_response = "" # Set to empty to trigger fallback
