@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -46,6 +47,16 @@ dependencies {
 
     // OkHttp Loggin Interceptor
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
+
+    // Firebase Bill of Materials (BoM)
+    implementation(platform("com.google.firebase:firebase-bom:33.14.0"))
+
+    // Firebase Authentication
+    implementation(libs.firebase.auth)
+    // Optionally, if you want Firebase UI for easy sign-in screens (not required if building custom UI)
+    // implementation("com.firebaseui:firebase-ui-auth:8.0.0") // Check for latest version
+
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
 
 
     testImplementation(libs.junit)

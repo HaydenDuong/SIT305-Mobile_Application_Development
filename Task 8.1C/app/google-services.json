@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "239165097160",
+    "project_id": "sit305-chatconnectai-a687e",
+    "storage_bucket": "sit305-chatconnectai-a687e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:239165097160:android:66a857bbcfb7ead85991fd",
+        "android_client_info": {
+          "package_name": "com.example.chatbotapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "239165097160-d2pjpfitrk5iah0rn806v5qfaleh96b2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.chatbotapp",
+            "certificate_hash": "e8674ed697cfc64955cf23e216505f4bb9fd375e"
+          }
+        },
+        {
+          "client_id": "239165097160-p9ethm0ukgm8b0clgadl811punnijbdm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkN57whIS_5B3W0nGxHXorRl5ZVJ9fWLk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "239165097160-p9ethm0ukgm8b0clgadl811punnijbdm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

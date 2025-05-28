@@ -1,9 +1,11 @@
 package com.example.chatbotapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log; // For logging
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast; // For error messages
@@ -17,6 +19,10 @@ import com.example.chatbotapp.adapters.ChatAdapter;
 import com.example.chatbotapp.data.ChatMessage;
 import com.example.chatbotapp.network.ApiService;     // Import ApiService
 import com.example.chatbotapp.network.RetrofitClient; // Import RetrofitClient
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.firebase.auth.FirebaseAuth;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,63 +38,84 @@ public class ChatActivity extends AppCompatActivity {
     private RecyclerView recyclerViewChat;
     private EditText editTextMessage;
     private ImageButton buttonSend;
-
+    private Button buttonSignOut;
     private ChatAdapter chatAdapter;
     private List<ChatMessage> chatMessagesList;
-    private String currentUsername;
-    private ApiService apiService; // Declare ApiService
+    private String currentUserUid; // To store Firebase User UID
+    private String currentUserDisplayName; // To store display name (email for now)
+    private ApiService apiService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        // Retrieve the username from LoginActivity
-        currentUsername = getIntent().getStringExtra("USERNAME");
-        if (currentUsername == null || currentUsername.trim().isEmpty()) {
-            currentUsername = "User"; // Fallback username
+        // Retrieve User UID and Display Name from LoginActivity
+        currentUserUid = getIntent().getStringExtra("USER_UID");
+        currentUserDisplayName = getIntent().getStringExtra("USER_DISPLAY_NAME");
+
+        if (currentUserDisplayName == null || currentUserDisplayName.trim().isEmpty()) {
+            currentUserDisplayName = "User"; // Fallback display name
         }
 
-        // Initialize views
+        if (currentUserUid == null) {
+            Log.e(TAG, "User UID is null. Navigating back to Login.");
+            Toast.makeText(this, "Error: User session not found.", Toast.LENGTH_LONG).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return; 
+        }
+
         recyclerViewChat = findViewById(R.id.recyclerViewChat);
         editTextMessage = findViewById(R.id.editTextMessage);
         buttonSend = findViewById(R.id.buttonSend);
+        buttonSignOut = findViewById(R.id.buttonSignOut);
 
-        // Initialize message list and adapter
         chatMessagesList = new ArrayList<>();
-        chatAdapter = new ChatAdapter(chatMessagesList, currentUsername);
+        chatAdapter = new ChatAdapter(chatMessagesList, currentUserDisplayName);
 
-        // Setup RecyclerView
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-        // Allow first item to place at the bottom, the latest one will be placed on top
         layoutManager.setStackFromEnd(true);
         recyclerViewChat.setLayoutManager(layoutManager);
         recyclerViewChat.setAdapter(chatAdapter);
 
-        // Initialize ApiService
         apiService = RetrofitClient.getApiService();
 
-        // Add initial welcome message from the bot
         addInitialBotMessage();
 
-        // Setup send button listener
         buttonSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                sendMessageToServer(); // Changed method name for clarity
+                sendMessageToServer();
+            }
+        });
+
+        buttonSignOut.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseAuth.getInstance().signOut();
+                // Also sign out from Google if needed
+                GoogleSignInClient googleSignInClient = GoogleSignIn.getClient(
+                        ChatActivity.this,
+                        new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestIdToken(getString(R.string.default_web_client_id))
+                                .requestEmail()
+                                .build()
+                );
+                googleSignInClient.signOut();
+                // Go back to LoginActivity
+                Intent intent = new Intent(ChatActivity.this, LoginActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
             }
         });
     }
 
     private void addInitialBotMessage() {
-        String welcomeText = "Welcome, " + currentUsername + "!";
-        if (currentUsername.equalsIgnoreCase("User") && getIntent().getStringExtra("USERNAME") == null) {
-            // If username was not passed and defaulted to "User", use generic welcome from wireframe
-            welcomeText = "Welcome User!";
-        }
+        String welcomeText = "Welcome, " + currentUserDisplayName + "!";
         ChatMessage botMessage = new ChatMessage(welcomeText, ChatMessage.SenderType.BOT);
         chatAdapter.addMessage(botMessage);
-        // No need to scroll here as it's the first message
     }
 
     private void sendMessageToServer() {
@@ -98,13 +125,11 @@ public class ChatActivity extends AppCompatActivity {
             return;
         }
 
-        // Add user message to UI
         ChatMessage userMessage = new ChatMessage(messageText, ChatMessage.SenderType.USER);
         chatAdapter.addMessage(userMessage);
         editTextMessage.setText("");
         scrollToBottom();
 
-        // Send message to server
         Call<String> call = apiService.sendMessage(messageText);
         call.enqueue(new Callback<String>() {
             @Override
@@ -115,19 +140,18 @@ public class ChatActivity extends AppCompatActivity {
                     chatAdapter.addMessage(botMessage);
                     scrollToBottom();
                 } else {
-                    // Handle API error (e.g., server error 500, or if response.body() is null)
                     String errorBody = "Error: ";
                     try {
                         if (response.errorBody() != null) {
                             errorBody += response.errorBody().string();
                         } else {
-                            errorBody += "Response not successful and error body is null.";
+                             errorBody += "Response not successful and error body is null. Code: " + response.code();
                         }
                     } catch (Exception e) {
-                        errorBody += "Error parsing error body.";
+                        errorBody += "Error parsing error body. Code: " + response.code();
                     }
-                    Log.e(TAG, "API Error: " + response.code() + " - " + errorBody);
-                    ChatMessage errorMessage = new ChatMessage("Sorry, bot error: " + response.code(), ChatMessage.SenderType.BOT);
+                    Log.e(TAG, "API Error: " + errorBody);
+                    ChatMessage errorMessage = new ChatMessage("Sorry, bot error. (" + response.code() + ")", ChatMessage.SenderType.BOT);
                     chatAdapter.addMessage(errorMessage);
                     scrollToBottom();
                 }
@@ -135,9 +159,8 @@ public class ChatActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(@NonNull Call<String> call, @NonNull Throwable t) {
-                // Handle network failure (e.g., no internet, server down)
                 Log.e(TAG, "Network Failure: " + t.getMessage(), t);
-                ChatMessage errorMessage = new ChatMessage("Network error: " + t.getMessage(), ChatMessage.SenderType.BOT);
+                ChatMessage errorMessage = new ChatMessage("Network error. Please check connection.", ChatMessage.SenderType.BOT);
                 chatAdapter.addMessage(errorMessage);
                 scrollToBottom();
             }

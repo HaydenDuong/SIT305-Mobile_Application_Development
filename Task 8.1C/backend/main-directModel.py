@@ -7,23 +7,22 @@ app = Flask(__name__)
 model = None
 tokenizer = None
 
-MODEL = "meta-llama/Llama-3.2-1B"
-MODEL = "google/gemma-3-1b-it"
 
+# MODEL = "meta-llama/Llama-3.2-1B"
+# MODEL = "google/gemma-3-1b-it"
+MODEL = "meta-llama/Llama-2-7b-chat-hf"
 
 def prepareLlamaBot():
     global model, tokenizer
     print(f"Loading {MODEL} model... This may take a while.")
 
-    # print("Loading Llama-3.2-1B model with 4-bit quantization... This may take a while.")
-
     # Configure 4-bit quantization
-    # quantization_config = BitsAndBytesConfig(
-    #     load_in_4bit=True,
-    #     bnb_4bit_compute_dtype=torch.float16,
-    #     bnb_4bit_quant_type="nf4",
-    #     bnb_4bit_use_double_quant=False
-    # )
+    quantization_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=torch.float16,
+        bnb_4bit_quant_type="nf4",
+        bnb_4bit_use_double_quant=False
+    )
 
     # Load tokenizer
     tokenizer = AutoTokenizer.from_pretrained(MODEL)
@@ -32,11 +31,12 @@ def prepareLlamaBot():
     # Load model with quantization
     model = AutoModelForCausalLM.from_pretrained(
         MODEL,
-        # device_map="auto",
-        # # quantization_config=quantization_config,
-        # torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32
+        device_map="auto",
+        quantization_config=quantization_config,
     )
-
+    # Print the device the model is loaded on.
+    # If 'cuda' or 'cuda:X', input tensors need to be moved to this device.
+    print(f"Model loaded. Primary device: {model.device}")
     print("Model and tokenizer loaded successfully.")
 
 
@@ -49,66 +49,132 @@ def index():
 def chat():
     global model, tokenizer
 
-    # Get userMessage from form data or raw body
     user_message = request.form.get('userMessage') or request.get_data(as_text=True).strip()
 
-    # Validate userMessage
     if not user_message:
         return Response("Error: userMessage cannot be empty", status=400, mimetype='text/plain')
 
-    # Print received request
-    print("\nReceived Request:")
-    print(f"userMessage: {user_message}")
+    print(f"\\nReceived User Message: {user_message}")
 
-    # Use raw userMessage as the input
-    prompt = user_message
+    # --- Section 1: Interest Extraction ---
+    extracted_interests_text = "NONE" # Default
+    parsed_interests = []
+    try:
+        interest_prompt_template = (
+            "Instruction: From the following user text, extract a list of distinct interests, hobbies, or topics. "
+            "Output ONLY a comma-separated list (e.g., books, hiking, programming). "
+            "If no specific interests are evident, output the single word: NONE. "
+            "Do not add any explanation, numbering, or conversational filler. "
+            "User text: '{text}'"
+            "Interests:" # Added a label for the model to fill after
+        )
+        interest_extraction_prompt = interest_prompt_template.format(text=user_message)
+        
+        print(f"DEBUG - Interest Extraction Prompt: {interest_extraction_prompt}")
 
-    # Tokenize input
-    inputs = tokenizer(prompt, return_tensors="pt", truncation=True, max_length=512, padding=True)
-    # if torch.cuda.is_available():
-    #    inputs = {k: v.cuda() for k, v in inputs.items()}
+        interest_inputs = tokenizer(interest_extraction_prompt, return_tensors="pt", truncation=True, max_length=512, padding=True)
+        
+        # Ensure inputs are on the same device as the model
+        interest_inputs_on_device = {k: v.to(model.device) for k, v in interest_inputs.items()}
 
-    # Generate response
+        with torch.no_grad():
+            interest_outputs_generate = model.generate(
+                input_ids=interest_inputs_on_device['input_ids'],
+                attention_mask=interest_inputs_on_device['attention_mask'],
+                max_new_tokens=60,
+                min_new_tokens=1,
+                do_sample=False,
+                temperature=None, # Explicitly set to None if do_sample is False
+                top_p=None,       # Explicitly set to None if do_sample is False
+                pad_token_id=tokenizer.pad_token_id,
+                eos_token_id=tokenizer.eos_token_id
+            )
+        
+        # Decode only the newly generated tokens
+        num_input_tokens_interest = interest_inputs_on_device['input_ids'].shape[1]
+        extracted_interests_text = tokenizer.decode(interest_outputs_generate[0][num_input_tokens_interest:], skip_special_tokens=True).strip()
+        
+        print(f"DEBUG - Raw Extracted Interests from LLM: '{extracted_interests_text}'")
+
+        # Normalize the "NONE." case and handle potential empty strings after stripping quotes
+        if extracted_interests_text.upper() == "NONE" or extracted_interests_text.upper() == "NONE.":
+            parsed_interests = [] # Represent "NONE" as an empty list of interests
+        else:
+            # Remove potential leading/trailing quotes if model adds them
+            if extracted_interests_text.startswith("'") and extracted_interests_text.endswith("'"):
+                extracted_interests_text = extracted_interests_text[1:-1]
+            if extracted_interests_text.startswith("\\\"") and extracted_interests_text.endswith("\\\""):
+                extracted_interests_text = extracted_interests_text[1:-1]
+            
+            # Split and filter, ensuring no empty strings or "NONE" variations are included
+            parsed_interests = [
+                interest.strip() for interest in extracted_interests_text.split(',') 
+                if interest.strip() and interest.strip().upper() not in ["NONE", "NONE."]
+            ]
+        
+        print(f"DEBUG - Parsed Interests: {parsed_interests}")
+
+    except Exception as e:
+        print(f"Error during interest extraction: {str(e)}")
+        # parsed_interests remains []
+    # --- End of Interest Extraction ---
+
+    # --- Section 2: Chat Response Generation ---
+    # Use the original user_message as the prompt for a conversational response
+    chat_prompt_text = user_message 
+    
+    chat_inputs = tokenizer(chat_prompt_text, return_tensors="pt", truncation=True, max_length=512, padding=True)
+    chat_inputs_on_device = {k: v.to(model.device) for k, v in chat_inputs.items()}
+
+    generated_chat_response = ""
     try:
         with torch.no_grad():
-            outputs = model.generate(
-                input_ids=inputs['input_ids'],
-                attention_mask=inputs['attention_mask'],
-                max_new_tokens=100,  # Limit to short responses
+            chat_outputs_generate = model.generate(
+                input_ids=chat_inputs_on_device['input_ids'],
+                attention_mask=chat_inputs_on_device['attention_mask'],
+                max_new_tokens=100,
                 min_new_tokens=1,
                 do_sample=True,
-                top_p=0.85,  # Focused sampling
-                temperature=0.6,  # Low randomness
+                top_p=0.85,
+                temperature=0.6,
                 pad_token_id=tokenizer.pad_token_id,
-                no_repeat_ngram_size=2  # Prevent repetition
+                eos_token_id=tokenizer.eos_token_id,
+                no_repeat_ngram_size=2
             )
-        raw_output = tokenizer.decode(outputs[0], skip_special_tokens=True).strip()
-        # Remove the prompt from the output
-        if raw_output.startswith(prompt):
-            raw_output = raw_output[len(prompt):].strip()
+        # Decode only the newly generated tokens
+        num_input_tokens_chat = chat_inputs_on_device['input_ids'].shape[1]
+        generated_chat_response = tokenizer.decode(chat_outputs_generate[0][num_input_tokens_chat:], skip_special_tokens=True).strip()
+        
+        # More robust cleaning for chat response, especially for leading non-alphanumeric characters
+        # This will remove leading periods, spaces, and the replacement characters ()
+        cleaned_chat_response = ""
+        for char_index, char_code in enumerate(generated_chat_response):
+            if char_code.isalnum(): # Find the first alphanumeric character
+                cleaned_chat_response = generated_chat_response[char_index:]
+                break
+        else: # If no alphanumeric characters found (e.g., all are or spaces)
+            cleaned_chat_response = "" # Set to empty to trigger fallback
+
+        generated_chat_response = cleaned_chat_response
+
     except Exception as e:
-        print(f"Error during generation: {str(e)}")
-        raw_output = ""
+        print(f"Error during chat response generation: {str(e)}")
+        # Fallback response will be handled below
 
-    # Print raw output
-    print(f"Raw Model Output: {raw_output}")
+    print(f"DEBUG - Raw Chat Response from LLM: '{generated_chat_response}'")
 
-    # Use raw output as response
-    response = raw_output
+    # Use the generated chat response, with fallback
+    final_app_response = generated_chat_response
 
-    # Fallback for empty, short, or irrelevant responses
-    if not response or response.isspace() or len(response.split()) < 3 or len(set(response.split())) < len(
-            response.split()) * 0.7:
-        response = f"Sorry, I couldn't provide a relevant answer to: '{user_message}'. Please rephrase."
+    # Fallback for empty, short, or irrelevant responses (applied to the chat response)
+    if not final_app_response or final_app_response.isspace() or len(final_app_response.split()) < 2 :
+        final_app_response = f"I received your message: '{user_message}'. Could you please elaborate or ask something else?"
+    elif len(set(final_app_response.split())) < len(final_app_response.split()) * 0.5 and len(final_app_response.split()) > 5 : # crude repetitiveness check
+        final_app_response = f"I'm finding it a bit tricky to respond to '{user_message}'. Can you try rephrasing?"
 
-    # Truncate to one sentence if too long
-    # response = response.split('.')[0] + '.' if '.' in response else response
 
-    # Print generated response
-    print(f"Generated Response: {response}\n")
-
-    # Return plain text response
-    return Response(response, mimetype='text/plain')
+    print(f"Final App Response: {final_app_response}\\n")
+    return Response(final_app_response, mimetype='text/plain')
 
 
 if __name__ == '__main__':
