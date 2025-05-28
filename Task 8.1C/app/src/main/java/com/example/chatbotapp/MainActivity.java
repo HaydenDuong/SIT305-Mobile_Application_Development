@@ -14,6 +14,8 @@ public class MainActivity extends AppCompatActivity {
 
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
+    private String userUidFromIntent; // Store for tab navigation
+    private String userDisplayNameFromIntent; // Store for tab navigation
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,22 +25,22 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // Store intent extras for later use in tab navigation
+        userUidFromIntent = getIntent().getStringExtra("USER_UID");
+        userDisplayNameFromIntent = getIntent().getStringExtra("USER_DISPLAY_NAME");
+
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.nav_host_fragment_container);
         navController = navHostFragment.getNavController();
 
-        // Retrieve extras from LoginActivity and set them as arguments for the graph
-        // This makes them available to the startDestination (UserProfileFragment)
         Bundle navArguments = new Bundle();
-        navArguments.putString("USER_UID", getIntent().getStringExtra("USER_UID"));
-        navArguments.putString("USER_DISPLAY_NAME", getIntent().getStringExtra("USER_DISPLAY_NAME"));
+        navArguments.putString("USER_UID", userUidFromIntent);
+        navArguments.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
         navController.setGraph(R.navigation.main_nav_graph, navArguments);
 
-        // Define top-level destinations for AppBarConfiguration if you don't want Up button for these
         appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.userProfileFragment, R.id.chatFragment, R.id.groupChatFragment)
                 .build();
-
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
@@ -53,9 +55,13 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                // Check current destination to avoid navigating to the same fragment
                 if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() != tab.getId()) {
-                    navController.navigate(tab.getId());
+                    Bundle args = new Bundle();
+                    args.putString("USER_UID", userUidFromIntent);
+                    args.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
+                    // For Profile tab, arguments are already set via setGraph, but resupplying doesn't hurt
+                    // and makes logic consistent if we decide to navigate to profile from other tabs with args.
+                    navController.navigate(tab.getId(), args);
                 }
             }
 
@@ -73,7 +79,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
-                // You can add similar reselection logic for other tabs if needed
             }
         });
 
