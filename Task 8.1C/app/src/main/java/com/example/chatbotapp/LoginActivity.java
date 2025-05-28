@@ -106,7 +106,7 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "Google Sign In Successful.", Toast.LENGTH_SHORT).show();
                             if (user != null) {
-                                navigateToChatActivity(user);
+                                navigateToMainActivity(user);
                             }
                         } else {
                             Log.w(TAG, "signInWithCredential_Google:failure", task.getException());
@@ -143,7 +143,7 @@ public class LoginActivity extends AppCompatActivity {
                             FirebaseUser user = mAuth.getCurrentUser();
                             Toast.makeText(LoginActivity.this, "Registration successful.", Toast.LENGTH_SHORT).show();
                             if (user != null) {
-                                navigateToChatActivity(user);
+                                navigateToMainActivity(user);
                             }
                         } else {
                             Log.w(TAG, "createUserWithEmail:failure", task.getException());
@@ -174,7 +174,7 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
                             if (user != null) {
-                                navigateToChatActivity(user);
+                                navigateToMainActivity(user);
                             }
                         } else {
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
@@ -185,12 +185,15 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void navigateToChatActivity(FirebaseUser user) {
-        Intent intent = new Intent(LoginActivity.this, UserProfileActivity.class);
+    private void navigateToMainActivity(FirebaseUser user) {
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         intent.putExtra("USER_UID", user.getUid());
         String displayName = user.getDisplayName();
         if (displayName == null || displayName.trim().isEmpty()) {
             displayName = user.getEmail();
+            if (displayName != null && displayName.contains("@")) {
+                displayName = displayName.split("@")[0];
+            }
         }
         intent.putExtra("USER_DISPLAY_NAME", displayName);
         startActivity(intent);
