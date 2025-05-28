@@ -11,7 +11,7 @@
     <string name="login_button_text">Login</string>
     <string name="register_button_text">Register</string>
     <string name="create_account_prompt">Don\'t have an account? Register</string>
-    <string name="login_welcome_message">Welcome Back!</string>
+    <string name="login_welcome_message">Welcome to ChatBotApp</string>
     <string name="register_welcome_message">Create Account</string>
     <string name="sign_in_with_google">Sign in with Google</string>
     <string name="default_web_client_id" translatable="false">YOUR_CLIENT_ID.apps.googleusercontent.com</string>

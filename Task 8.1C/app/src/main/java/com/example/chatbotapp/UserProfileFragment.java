@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import androidx.activity.OnBackPressedCallback;
 
 public class UserProfileFragment extends Fragment {
 
@@ -34,6 +35,13 @@ public class UserProfileFragment extends Fragment {
     private String userUid;
     private String userDisplayName;
     private String userEmail;
+
+    // Interface for MainActivity to communicate reselection
+    public interface OnProfileTabReselectedListener {
+        boolean handleTabReselection();
+    }
+
+    private OnBackPressedCallback onBackPressedCallback;
 
     public UserProfileFragment() {
         // Required empty public constructor
@@ -55,6 +63,21 @@ public class UserProfileFragment extends Fragment {
                  userDisplayName = userEmail.split("@")[0];
             }
         }
+
+        // Handle back press when InterestsFragment is shown
+        onBackPressedCallback = new OnBackPressedCallback(false) { // Initially disabled
+            @Override
+            public void handleOnBackPressed() {
+                // This is called when back is pressed AND callback is enabled
+                if (interestsFragmentContainer.getVisibility() == View.VISIBLE) {
+                    getChildFragmentManager().popBackStack();
+                    setProfileContentVisibility(View.VISIBLE);
+                    interestsFragmentContainer.setVisibility(View.GONE);
+                    setEnabled(false); // Disable after handling
+                }
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
     }
 
     @Override
@@ -92,6 +115,7 @@ public class UserProfileFragment extends Fragment {
                 loadInterestsFragment();
                 setProfileContentVisibility(View.GONE);
                 interestsFragmentContainer.setVisibility(View.VISIBLE);
+                onBackPressedCallback.setEnabled(true); // Enable custom back press handling
             } else {
                 Toast.makeText(getContext(), "User ID not found.", Toast.LENGTH_SHORT).show();
             }
@@ -148,8 +172,28 @@ public class UserProfileFragment extends Fragment {
         buttonSignOut.setVisibility(visibility);
     }
     
-    // Handle back press from InterestsFragment
-    // This needs to be coordinated with MainActivity's onBackPressed if it also handles back stack for main navigation
-    // For fragments loaded with getChildFragmentManager, the child fragment manager handles its own back stack.
-    // So, when InterestsFragment is shown, a physical back press should pop it from child back stack first.
+    /**
+     * Called by MainActivity when the Profile tab is reselected.
+     * @return true if the reselection was handled (InterestsFragment was visible and hidden),
+     *         false otherwise.
+     */
+    public boolean handleProfileTabReselection() {
+        if (interestsFragmentContainer.getVisibility() == View.VISIBLE) {
+            getChildFragmentManager().popBackStack();
+            setProfileContentVisibility(View.VISIBLE);
+            interestsFragmentContainer.setVisibility(View.GONE);
+            onBackPressedCallback.setEnabled(false); // Disable custom back press handling
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        // It's good practice to remove the callback to avoid memory leaks
+        if (onBackPressedCallback != null) {
+            onBackPressedCallback.remove();
+        }
+    }
 } 

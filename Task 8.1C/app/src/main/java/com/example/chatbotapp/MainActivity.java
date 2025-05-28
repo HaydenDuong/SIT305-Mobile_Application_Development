@@ -3,6 +3,7 @@ package com.example.chatbotapp;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -62,7 +63,18 @@ public class MainActivity extends AppCompatActivity {
             public void onTabUnselected(TabLayout.Tab tab) { }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) { }
+            public void onTabReselected(TabLayout.Tab tab) {
+                if (tab.getId() == R.id.userProfileFragment) {
+                    NavHostFragment navHost = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
+                    if (navHost != null && navHost.getChildFragmentManager().getFragments().size() > 0) {
+                        Fragment currentFragment = navHost.getChildFragmentManager().getFragments().get(0);
+                        if (currentFragment instanceof UserProfileFragment) {
+                            ((UserProfileFragment) currentFragment).handleProfileTabReselection();
+                        }
+                    }
+                }
+                // You can add similar reselection logic for other tabs if needed
+            }
         });
 
         // Update selected tab when NavController destination changes
