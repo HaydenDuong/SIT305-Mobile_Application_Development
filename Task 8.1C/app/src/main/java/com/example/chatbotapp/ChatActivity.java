@@ -130,7 +130,7 @@ public class ChatActivity extends AppCompatActivity {
         editTextMessage.setText("");
         scrollToBottom();
 
-        Call<String> call = apiService.sendMessage(messageText);
+        Call<String> call = apiService.sendMessage(currentUserUid, messageText);
         call.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {

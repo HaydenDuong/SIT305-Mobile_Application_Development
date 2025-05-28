@@ -122,19 +122,17 @@ def chat():
         extracted_interests_text = tokenizer.decode(interest_outputs_generate[0][num_input_tokens_interest:], skip_special_tokens=True).strip()
         print(f"DEBUG - Raw Extracted Interests from LLM: '{extracted_interests_text}'")
 
-        processed_interests_text = extracted_interests_text
-        if extracted_interests_text.upper().startswith("NONE"):
-            processed_interests_text = extracted_interests_text.split('\n')[0].strip()
-
-        if processed_interests_text.upper() == "NONE" or processed_interests_text.upper() == "NONE.":
+        first_line = extracted_interests_text.split('\n')[0].strip()
+        if first_line.upper() == "NONE" or first_line.upper() == "NONE.":
             parsed_interests = []
         else:
-            if processed_interests_text.startswith("'") and processed_interests_text.endswith("'"):
-                processed_interests_text = processed_interests_text[1:-1]
-            if processed_interests_text.startswith("\"") and processed_interests_text.endswith("\""):
-                processed_interests_text = processed_interests_text[1:-1]
+            # Remove quotes if present
+            if first_line.startswith("'") and first_line.endswith("'"):
+                first_line = first_line[1:-1]
+            if first_line.startswith("\"") and first_line.endswith("\""):
+                first_line = first_line[1:-1]
             parsed_interests = [
-                interest.strip() for interest in processed_interests_text.split(',')
+                interest.strip() for interest in first_line.split(',')
                 if interest.strip() and interest.strip().upper() not in ["NONE", "NONE."]
             ]
         print(f"DEBUG - Parsed Interests: {parsed_interests}")
