@@ -2,19 +2,48 @@ from flask import Flask, request, Response
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import torch
 import argparse
+from neo4j import GraphDatabase # Import Neo4j driver
+import os # For potentially using environment variables later
 
 app = Flask(__name__)
-model = None
+
+# --- LLM Model and Tokenizer ---
+llm_model = None # Renamed from model to avoid conflict
 tokenizer = None
+MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf" # Changed back for stability
 
+# --- Neo4j Connection Details ---
+# IMPORTANT: Replace with your actual AuraDB credentials
+NEO4J_URI = "neo4j+ssc://26c68983.databases.neo4j.io"
+NEO4J_USER = "neo4j"
+NEO4J_PASSWORD = "B0_uJk_ec2ISsyystlRcGpfqJlIHq3MgIs3OtCq1Tq8"
+neo4j_driver = None
 
-# MODEL = "meta-llama/Llama-3.2-1B"
-# MODEL = "google/gemma-3-1b-it"
-MODEL = "meta-llama/Llama-2-7b-chat-hf"
+def get_neo4j_driver():
+    global neo4j_driver
+    if neo4j_driver is None:
+        try:
+            neo4j_driver = GraphDatabase.driver(NEO4J_URI, auth=(NEO4J_USER, NEO4J_PASSWORD))
+            # Check connectivity
+            with neo4j_driver.session(database="neo4j") as session: # AuraDB default database is neo4j
+                session.run("RETURN 1 AS test")
+            print("Successfully connected to Neo4j AuraDB!")
+        except Exception as e:
+            print(f"Error connecting to Neo4j: {e}")
+            neo4j_driver = None # Ensure driver is None if connection failed
+    return neo4j_driver
+
+def close_neo4j_driver():
+    global neo4j_driver
+    if neo4j_driver is not None:
+        neo4j_driver.close()
+        neo4j_driver = None
+        print("Neo4j connection closed.")
+
 
 def prepareLlamaBot():
-    global model, tokenizer
-    print(f"Loading {MODEL} model... This may take a while.")
+    global llm_model, tokenizer # Use renamed llm_model
+    print(f"Loading {MODEL_NAME} model... This may take a while.")
 
     # Configure 4-bit quantization
     quantization_config = BitsAndBytesConfig(
@@ -25,29 +54,29 @@ def prepareLlamaBot():
     )
 
     # Load tokenizer
-    tokenizer = AutoTokenizer.from_pretrained(MODEL)
+    tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
     tokenizer.pad_token = tokenizer.eos_token if tokenizer.pad_token is None else tokenizer.pad_token
 
     # Load model with quantization
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL,
+    llm_model = AutoModelForCausalLM.from_pretrained(
+        MODEL_NAME,
         device_map="auto",
         quantization_config=quantization_config,
     )
     # Print the device the model is loaded on.
     # If 'cuda' or 'cuda:X', input tensors need to be moved to this device.
-    print(f"Model loaded. Primary device: {model.device}")
+    print(f"Model loaded. Primary device: {llm_model.device}")
     print("Model and tokenizer loaded successfully.")
 
 
 @app.route('/')
 def index():
-    return "Welcome to the Llama Chatbot API!"
+    return "Welcome to the Llama Chatbot API with Neo4j Integration!"
 
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    global model, tokenizer
+    global llm_model, tokenizer # Use renamed llm_model
 
     user_message = request.form.get('userMessage') or request.get_data(as_text=True).strip()
 
@@ -76,10 +105,10 @@ def chat():
         interest_inputs = tokenizer(interest_extraction_prompt, return_tensors="pt", truncation=True, max_length=512, padding=True)
         
         # Ensure inputs are on the same device as the model
-        interest_inputs_on_device = {k: v.to(model.device) for k, v in interest_inputs.items()}
+        interest_inputs_on_device = {k: v.to(llm_model.device) for k, v in interest_inputs.items()}
 
         with torch.no_grad():
-            interest_outputs_generate = model.generate(
+            interest_outputs_generate = llm_model.generate(
                 input_ids=interest_inputs_on_device['input_ids'],
                 attention_mask=interest_inputs_on_device['attention_mask'],
                 max_new_tokens=60,
@@ -128,12 +157,12 @@ def chat():
     chat_prompt_text = user_message 
     
     chat_inputs = tokenizer(chat_prompt_text, return_tensors="pt", truncation=True, max_length=512, padding=True)
-    chat_inputs_on_device = {k: v.to(model.device) for k, v in chat_inputs.items()}
+    chat_inputs_on_device = {k: v.to(llm_model.device) for k, v in chat_inputs.items()}
 
     generated_chat_response = ""
     try:
         with torch.no_grad():
-            chat_outputs_generate = model.generate(
+            chat_outputs_generate = llm_model.generate(
                 input_ids=chat_inputs_on_device['input_ids'],
                 attention_mask=chat_inputs_on_device['attention_mask'],
                 max_new_tokens=100,
@@ -179,8 +208,17 @@ def chat():
     elif len(set(final_app_response.split())) < len(final_app_response.split()) * 0.5 and len(final_app_response.split()) > 5 : # crude repetitiveness check
         final_app_response = f"I'm finding it a bit tricky to respond to '{user_message}'. Can you try rephrasing?"
 
-
     print(f"Final App Response: {final_app_response}\\n")
+
+    # TODO: In Step 1.4, send user_id (from app) and parsed_interests to Neo4j here
+    # For now, just ensure driver can be initialized
+    driver = get_neo4j_driver()
+    if driver:
+        print("Neo4j driver initialized successfully in /chat endpoint.")
+        # Example: you could add a test write here if needed, but we'll do proper writes in 1.4
+    else:
+        print("Failed to initialize Neo4j driver in /chat endpoint.")
+
     return Response(final_app_response, mimetype='text/plain')
 
 
@@ -191,5 +229,11 @@ if __name__ == '__main__':
 
     port_num = args.port
     prepareLlamaBot()
+    get_neo4j_driver() # Initialize driver on startup
     print(f"App running on port {port_num}")
-    app.run(host='0.0.0.0', port=port_num)
+    # Ensure Neo4j driver is closed when app shuts down (won't work perfectly with Flask dev server reloads)
+    # For robust cleanup, a proper application context or atexit might be needed in a production app.
+    try:
+        app.run(host='0.0.0.0', port=port_num)
+    finally:
+        close_neo4j_driver()
