@@ -63,11 +63,13 @@ public class UserProfileActivity extends AppCompatActivity {
         // Initially hide the fragment container and show buttons
         fragmentContainer.setVisibility(View.GONE);
         setButtonsVisibility(View.VISIBLE);
+        // userInfoCard is visible by default here
 
         userInfoCard.setOnClickListener(v -> {
             loadInterestsFragment();
             // Hide buttons and show fragment container
             setButtonsVisibility(View.GONE);
+            userInfoCard.setVisibility(View.GONE); // <<< HIDE USER INFO CARD
             fragmentContainer.setVisibility(View.VISIBLE);
         });
 
@@ -116,6 +118,7 @@ public class UserProfileActivity extends AppCompatActivity {
             getSupportFragmentManager().popBackStackImmediate(); // Clear the fragment
             fragmentContainer.setVisibility(View.GONE);
             setButtonsVisibility(View.VISIBLE);
+            userInfoCard.setVisibility(View.VISIBLE); // <<< SHOW USER INFO CARD AGAIN
         } else {
             super.onBackPressed();
         }
