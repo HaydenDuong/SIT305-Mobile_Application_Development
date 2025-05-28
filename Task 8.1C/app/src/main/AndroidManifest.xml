@@ -15,10 +15,7 @@
         android:theme="@style/Theme.ChatBotApp"
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
-        <activity
-            android:name=".UserProfileActivity"
-            android:exported="false"
-            android:theme="@style/Theme.ChatBotApp" />
+
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -28,9 +25,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".ChatActivity"
-            android:exported="false"></activity>
+
         <activity
             android:name=".MainActivity" 
             android:exported="false" />
