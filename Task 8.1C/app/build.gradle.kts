@@ -30,6 +30,9 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -45,6 +48,9 @@ dependencies {
     // Retrofit Scalars Converter (for plain text response)
     implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
 
+    // Gson Converter to Retrofit
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
     // OkHttp Loggin Interceptor
     implementation("com.squareup.okhttp3:logging-interceptor:4.11.0")
 
@@ -57,6 +63,8 @@ dependencies {
     // implementation("com.firebaseui:firebase-ui-auth:8.0.0") // Check for latest version
 
     implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation(libs.navigation.fragment)
+    implementation(libs.navigation.ui)
 
 
     testImplementation(libs.junit)

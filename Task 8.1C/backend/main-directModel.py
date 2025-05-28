@@ -222,8 +222,7 @@ def update_user_interests_in_neo4j(uid, interests):
                 interest=interest
             )
 
-
-# (Optional) Endpoint to get user interests
+# Endpoint to get user interests
 @app.route('/user_interests')
 def user_interests():
     uid = request.args.get('uid')
@@ -236,6 +235,53 @@ def user_interests():
         interests = [record["i.name"] for record in result]
     return jsonify({"uid": uid, "interests": interests})
 
+# Endpoint to delete a specific interest for a user
+@app.route('/add_interest', methods=['POST'])
+def add_interest():
+    uid = request.form.get('user_id') or (request.json.get('user_id') if request.is_json else None)
+    interest = request.form.get('interest') or (request.json.get('interest') if request.is_json else None)
+    if not uid or not interest:
+        return Response("Error: user_id and interest are required", status=400, mimetype='text/plain')
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        session.run(
+            """
+            MERGE (u:User {id: $uid})
+            MERGE (i:Interest {name: $interest})
+            MERGE (u)-[:HAS_INTEREST]->(i)
+            """,
+            uid=uid,
+            interest=interest
+        )
+    return jsonify({"status": "success", "added_interest": interest})
+
+# Endpoint to delete a specific interest for a user
+@app.route('/delete_interest', methods=['POST'])
+def delete_interest():
+    uid = request.form.get('user_id') or (request.json.get('user_id') if request.is_json else None)
+    interest = request.form.get('interest') or (request.json.get('interest') if request.is_json else None)
+    if not uid or not interest:
+        return Response("Error: user_id and interest are required", status=400, mimetype='text/plain')
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        # Delete the HAS_INTEREST relationship
+        session.run(
+            """
+            MATCH (u:User {id: $uid})-[r:HAS_INTEREST]->(i:Interest {name: $interest})
+            DELETE r
+            """,
+            uid=uid,
+            interest=interest
+        )
+        # Optionally, delete orphaned interests
+        session.run(
+            """
+            MATCH (i:Interest)
+            WHERE NOT (i)<-[:HAS_INTEREST]-(:User)
+            DELETE i
+            """
+        )
+    return jsonify({"status": "success", "deleted_interest": interest})
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

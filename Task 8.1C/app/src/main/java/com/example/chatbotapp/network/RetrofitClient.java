@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class RetrofitClient {
@@ -31,6 +32,7 @@ public class RetrofitClient {
                     .baseUrl(BASE_URL)
                     .client(okHttpClient) // Set the custom OkHttpClient
                     .addConverterFactory(ScalarsConverterFactory.create()) // For plain text responses
+                    .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
         return retrofitInstance;

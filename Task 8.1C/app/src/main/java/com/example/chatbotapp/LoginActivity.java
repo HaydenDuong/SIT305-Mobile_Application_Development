@@ -48,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         mAuth = FirebaseAuth.getInstance();
+        mAuth.signOut();
 
         editTextEmail = findViewById(R.id.editTextEmail);
         editTextPassword = findViewById(R.id.editTextPassword);
@@ -86,15 +87,6 @@ public class LoginActivity extends AppCompatActivity {
         buttonLogin.setOnClickListener(v -> loginUser());
         buttonRegister.setOnClickListener(v -> registerUser());
         buttonGoogleSignIn.setOnClickListener(v -> signInWithGoogle());
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            navigateToChatActivity(currentUser);
-        }
     }
 
     private void signInWithGoogle() {
@@ -194,7 +186,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void navigateToChatActivity(FirebaseUser user) {
-        Intent intent = new Intent(LoginActivity.this, ChatActivity.class);
+        Intent intent = new Intent(LoginActivity.this, UserProfileActivity.class);
         intent.putExtra("USER_UID", user.getUid());
         String displayName = user.getDisplayName();
         if (displayName == null || displayName.trim().isEmpty()) {
