@@ -3,7 +3,7 @@ package com.example.chatbotapp.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -39,7 +39,7 @@ public class InterestsAdapter extends RecyclerView.Adapter<InterestsAdapter.View
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String interest = interests.get(position);
         holder.textViewInterest.setText(interest);
-        holder.buttonDelete.setOnClickListener(v -> deleteListener.onDelete(interest));
+        holder.imageButtonDelete.setOnClickListener(v -> deleteListener.onDelete(interest));
     }
 
     @Override
@@ -49,11 +49,11 @@ public class InterestsAdapter extends RecyclerView.Adapter<InterestsAdapter.View
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView textViewInterest;
-        Button buttonDelete;
+        ImageButton imageButtonDelete;
         ViewHolder(View itemView) {
             super(itemView);
             textViewInterest = itemView.findViewById(R.id.textViewInterest);
-            buttonDelete = itemView.findViewById(R.id.buttonDeleteInterest);
+            imageButtonDelete = itemView.findViewById(R.id.imageButtonDeleteInterest);
         }
     }
 }
