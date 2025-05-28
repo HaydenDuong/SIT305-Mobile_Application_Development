@@ -1,4 +1,4 @@
-from flask import Flask, request, Response
+from flask import Flask, request, Response, jsonify
 from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
 import torch
 import argparse
@@ -76,14 +76,16 @@ def index():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    global llm_model, tokenizer # Use renamed llm_model
+    global llm_model, tokenizer
 
-    user_message = request.form.get('userMessage') or request.get_data(as_text=True).strip()
+    # Get user_id from form or JSON
+    user_id = request.form.get('user_id') or (request.json.get('user_id') if request.is_json else None)
+    user_message = request.form.get('userMessage') or (request.json.get('userMessage') if request.is_json else request.get_data(as_text=True).strip())
 
-    if not user_message:
-        return Response("Error: userMessage cannot be empty", status=400, mimetype='text/plain')
+    if not user_id or not user_message:
+        return Response("Error: user_id and userMessage are required", status=400, mimetype='text/plain')
 
-    print(f"\\nReceived User Message: {user_message}")
+    print(f"\nReceived User Message: {user_message} (from user: {user_id})")
 
     # --- Section 1: Interest Extraction ---
     extracted_interests_text = "NONE" # Default
@@ -99,12 +101,9 @@ def chat():
             "Interests:"
         )
         interest_extraction_prompt = interest_prompt_template.format(text=user_message)
-        
         print(f"DEBUG - Interest Extraction Prompt: {interest_extraction_prompt}")
 
         interest_inputs = tokenizer(interest_extraction_prompt, return_tensors="pt", truncation=True, max_length=512, padding=True)
-        
-        # Ensure inputs are on the same device as the model
         interest_inputs_on_device = {k: v.to(llm_model.device) for k, v in interest_inputs.items()}
 
         with torch.no_grad():
@@ -114,43 +113,40 @@ def chat():
                 max_new_tokens=60,
                 min_new_tokens=1,
                 do_sample=False,
-                temperature=None, # Explicitly set to None if do_sample is False
-                top_p=None,       # Explicitly set to None if do_sample is False
+                temperature=None,
+                top_p=None,
                 pad_token_id=tokenizer.pad_token_id,
                 eos_token_id=tokenizer.eos_token_id
             )
-        
-        # Decode only the newly generated tokens
         num_input_tokens_interest = interest_inputs_on_device['input_ids'].shape[1]
         extracted_interests_text = tokenizer.decode(interest_outputs_generate[0][num_input_tokens_interest:], skip_special_tokens=True).strip()
-        
         print(f"DEBUG - Raw Extracted Interests from LLM: '{extracted_interests_text}'")
 
-        # Handle potential instruction regurgitation if output starts with NONE
         processed_interests_text = extracted_interests_text
         if extracted_interests_text.upper().startswith("NONE"):
-            # Take only the first line if it starts with NONE, to discard regurgitated instructions
             processed_interests_text = extracted_interests_text.split('\n')[0].strip()
 
         if processed_interests_text.upper() == "NONE" or processed_interests_text.upper() == "NONE.":
-            parsed_interests = [] 
+            parsed_interests = []
         else:
             if processed_interests_text.startswith("'") and processed_interests_text.endswith("'"):
                 processed_interests_text = processed_interests_text[1:-1]
-            if processed_interests_text.startswith("\\\"") and processed_interests_text.endswith("\\\""):
+            if processed_interests_text.startswith("\"") and processed_interests_text.endswith("\""):
                 processed_interests_text = processed_interests_text[1:-1]
-            
             parsed_interests = [
-                interest.strip() for interest in processed_interests_text.split(',') 
+                interest.strip() for interest in processed_interests_text.split(',')
                 if interest.strip() and interest.strip().upper() not in ["NONE", "NONE."]
             ]
-        
         print(f"DEBUG - Parsed Interests: {parsed_interests}")
 
     except Exception as e:
         print(f"Error during interest extraction: {str(e)}")
         # parsed_interests remains []
-    # --- End of Interest Extraction ---
+
+    # --- Neo4j Integration: Store user and interests ---
+    if parsed_interests:
+        update_user_interests_in_neo4j(user_id, parsed_interests)
+        print(f"Stored/updated interests for user {user_id}: {parsed_interests}")
 
     # --- Section 2: Chat Response Generation ---
     # Use the original user_message as the prompt for a conversational response
@@ -208,18 +204,39 @@ def chat():
     elif len(set(final_app_response.split())) < len(final_app_response.split()) * 0.5 and len(final_app_response.split()) > 5 : # crude repetitiveness check
         final_app_response = f"I'm finding it a bit tricky to respond to '{user_message}'. Can you try rephrasing?"
 
-    print(f"Final App Response: {final_app_response}\\n")
-
-    # TODO: In Step 1.4, send user_id (from app) and parsed_interests to Neo4j here
-    # For now, just ensure driver can be initialized
-    driver = get_neo4j_driver()
-    if driver:
-        print("Neo4j driver initialized successfully in /chat endpoint.")
-        # Example: you could add a test write here if needed, but we'll do proper writes in 1.4
-    else:
-        print("Failed to initialize Neo4j driver in /chat endpoint.")
+    print(f"Final App Response: {final_app_response}\n")
 
     return Response(final_app_response, mimetype='text/plain')
+
+
+def update_user_interests_in_neo4j(uid, interests):
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        session.run("MERGE (u:User {id: $uid})", uid=uid)
+        for interest in interests:
+            session.run(
+                """
+                MERGE (i:Interest {name: $interest})
+                MERGE (u:User {id: $uid})
+                MERGE (u)-[:HAS_INTEREST]->(i)
+                """,
+                uid=uid,
+                interest=interest
+            )
+
+
+# (Optional) Endpoint to get user interests
+@app.route('/user_interests')
+def user_interests():
+    uid = request.args.get('uid')
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        result = session.run(
+            "MATCH (u:User {id: $uid})-[:HAS_INTEREST]->(i:Interest) RETURN i.name",
+            uid=uid
+        )
+        interests = [record["i.name"] for record in result]
+    return jsonify({"uid": uid, "interests": interests})
 
 
 if __name__ == '__main__':

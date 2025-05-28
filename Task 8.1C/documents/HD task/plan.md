@@ -9,7 +9,7 @@
 *   **AI Core:** Llama 2 API (Python backend)
 *   **Authentication:** Firebase Authentication
 *   **Graph Database:** Neo4j
-*   **Backend Framework:** Flask (Python, for Llama 2 API and potentially Neo4j interactions)
+*   **Backend Framework:** Flask (Python, for Llama 2 API and Neo4j interactions)
 
 ---
 
@@ -61,6 +61,32 @@
 
 ---
 
+### **App Structure & UI/UX Enhancements (NEW)**
+
+**Activities/Fragments:**
+1. **LoginActivity** – User authentication (Firebase).
+2. **ProfileActivity** – Shows user info (username, email), and a clickable card for interests.
+    - Card opens `InterestsFragment` where interests are listed (with delete buttons for each interest).
+    - Buttons: Chat with AI, Chat with Group, Sign Out.
+3. **ChatActivity** – Chat with AI model (sign out moved to Profile).
+4. **GroupChatActivity** – Chat with other users in interest-based groups.
+    - Shows groups based on user's interests (dynamically created in Neo4j).
+    - User can join/leave groups and chat; conversation history is saved.
+
+**Interest Management:**
+- Interests are extracted by AI and stored in Neo4j.
+- User can view/delete interests in the app (removes `HAS_INTEREST` relationship in Neo4j).
+- (Optional) User can manually add interests via UI.
+
+**Group Management:**
+- Groups are created dynamically in Neo4j for each unique interest.
+- Users with the same interest are shown the corresponding group and can join.
+- Group membership: `(:User)-[:MEMBER_OF]->(:Group)`
+- Group topic: `(:Group)-[:ABOUT]->(:Interest)`
+- Group chat messages: `(:Message)-[:IN]->(:Group)` (message nodes store sender, timestamp, content).
+
+---
+
 ### Phase 2: Neo4j Integration & First Recommendations
 *(Focus: Building the knowledge graph and implementing the first layer of social matching)*
 
@@ -71,7 +97,9 @@
 1.  **Neo4j Setup & Configuration**
     *   **Task:** Install and configure a Neo4j instance.
         *   Options: Local Neo4j Desktop, Docker container, or a cloud-hosted Neo4j AuraDB free tier.
-    *   **Model Definition:** Define initial node labels (`User`, `Interest`) and relationship types (`HAS_INTEREST`).
+    *   **Model Definition:**
+        *   Node labels: `User`, `Interest`, `Group`, `Message`
+        *   Relationship types: `HAS_INTEREST`, `MEMBER_OF`, `ABOUT`, `IN`
     *   **Deliverable:** A running Neo4j instance accessible by the backend.
 
 2.  **Backend Service to Update Neo4j**
@@ -83,8 +111,11 @@
             *   For each extracted interest:
                 *   Create/update the `Interest` node (e.g., `MERGE (i:Interest {name: $interestName})`).
                 *   Create a `HAS_INTEREST` relationship between the user and the interest (e.g., `MERGE (u)-[:HAS_INTEREST]->(i)`).
+            *   For each interest, create a `Group` node if it doesn't exist (e.g., `MERGE (g:Group {name: $interestName})`), and link it to the interest: `MERGE (g)-[:ABOUT]->(i)`.
+            *   When a user joins a group, create `(:User)-[:MEMBER_OF]->(:Group)`.
+            *   When a message is sent in a group, create a `Message` node and link it to the group and sender.
     *   **Integration:** This logic should be triggered after Llama 2 extracts interests.
-    *   **Deliverable:** User profiles and their interests are being populated in the Neo4j graph.
+    *   **Deliverable:** User profiles, interests, groups, and group memberships/messages are being populated in the Neo4j graph.
 
 3.  **Basic User Recommendation Logic (Backend)**
     *   **Task:** Create a new backend API endpoint (e.g., `GET /recommendations/users`).
@@ -103,13 +134,14 @@
     *   **Output:** A list of recommended User UIDs (and perhaps their common interests).
     *   **Deliverable:** Backend API that provides user recommendations based on shared interests in Neo4j.
 
-4.  **Android UI for Displaying User Recommendations**
+4.  **Android UI for Displaying User Recommendations and Groups**
     *   **Task:** Create a new `Activity` or `Fragment` (e.g., `RecommendationsActivity`).
     *   **Functionality:**
         *   Fetch recommendations from the backend API endpoint.
         *   Use a `RecyclerView` to display recommended users (e.g., show username/UID and maybe the number of common interests).
-        *   (Future enhancement): Clicking on a recommended user could lead to their profile or initiate a chat.
-    *   **Deliverable:** Android app can display a list of recommended users.
+        *   Show groups based on user's interests (dynamically created).
+        *   (Future enhancement): Clicking on a recommended user could lead to their profile or initiate a chat; clicking a group could open group chat.
+    *   **Deliverable:** Android app can display a list of recommended users and groups.
 
 ---
 
@@ -125,7 +157,7 @@
     *   **Neo4j Model:** Add `Group` node label and `INTERESTED_IN_GROUP` or `MEMBER_OF` relationships.
     *   **Llama 2 / Backend:**
         *   Can Llama 2 also suggest relevant existing groups based on interests?
-        *   Or, initially, manually populate some groups related to common interests in Neo4j.
+        *   Or, initially, dynamically populate groups related to interests in Neo4j.
     *   **Recommendation Logic:** Update backend to query for relevant groups based on user interests.
     *   **Android UI:** Add a section/tab in `RecommendationsActivity` to show suggested groups.
     *   **Deliverable:** App can suggest relevant groups/communities.
@@ -138,20 +170,30 @@
         *   Discuss how this feedback *could* be used to refine Llama 2's interest extraction (e.g., by providing examples of good/bad interest associations) or to adjust weights in Neo4j queries. Full implementation might be out of scope, but demonstrating understanding is key.
     *   **Deliverable:** Users can provide feedback; system stores it. Discussion of how it aids AI.
 
-3.  **(Optional) Manual Profile Input / Interest Tagging**
+3.  **Manual Profile Input / Interest Tagging**
     *   **Task:** Allow users to explicitly add interests to their profile.
     *   **Android UI:** A simple profile editing screen.
     *   **Backend & Neo4j:** Update user's interests in Neo4j based on manual input. This complements AI-driven extraction.
     *   **Deliverable:** Users can augment their AI-generated interest profile.
+
+4.  **Group Chat History and Messaging**
+    *   **Task:** Store and retrieve group chat messages in Neo4j (or another DB if needed for scale).
+    *   **Backend:**
+        *   When a user sends a message in a group, create a `Message` node with sender, timestamp, content, and link it to the group and user.
+        *   Provide endpoints to fetch recent messages for a group.
+    *   **Android UI:**
+        *   Display group chat history in `GroupChatActivity`.
+        *   Allow sending new messages and updating the chat in real time (or with polling).
+    *   **Deliverable:** Group chat history is persistent and accessible.
 
 ---
 
 ## High HD Criteria Focus Summary:
 
 *   **Functionality:** Seamless Llama 2 integration for both chat and *advanced interest extraction*. Flawless operation of all features.
-*   **User Interface:** Exceptionally designed, intuitive, enhances engagement (especially the recommendation display).
+*   **User Interface:** Exceptionally designed, intuitive, enhances engagement (especially the recommendation and group display).
 *   **Technical Proficiency:** Exceptional use of Android/Java, Python. Advanced coding for Llama 2 (prompt engineering, structured output), Neo4j (complex queries, graph modeling), and their integration. Well-structured, readable, optimized code.
-*   **Innovation and Creativity:** The core concept of ChatConnect AI, using Llama 2 for social matchmaking. The way interests are derived and connections are mapped in Neo4j.
+*   **Innovation and Creativity:** The core concept of ChatConnect AI, using Llama 2 for social matchmaking. The way interests are derived and connections are mapped in Neo4j, and dynamic group creation.
 *   **Future Work and Scalability:** Articulating how the feedback loop improves the AI, how new recommendation types can be added, and how the system can scale.
 
 ---
@@ -160,7 +202,7 @@
 
 1.  **Llama 2 for Structured Output:** Reliably getting Llama 2 to extract interests in a usable, structured format while maintaining natural conversation.
 2.  **Neo4j Learning Curve & Integration:** Efficiently modeling data and writing performant Cypher queries if new to Neo4j.
-3.  **Scope Management:** The proposal is ambitious. Prioritize core features that demonstrate the main concept for the deadline. Focus on a "vertical slice" that shows the end-to-end flow (chat -> interest extraction -> Neo4j storage -> recommendation).
+3.  **Scope Management:** The proposal is ambitious. Prioritize core features that demonstrate the main concept for the deadline. Focus on a "vertical slice" that shows the end-to-end flow (chat -> interest extraction -> Neo4j storage -> recommendation -> group chat).
 
 ---
 
@@ -170,5 +212,6 @@
 *   Take screenshots/short video clips of working features at each stage.
 *   Clearly explain the data flow: User Input -> Android App -> Python Backend (Llama 2) -> Neo4j -> Recommendation Engine -> Android App.
 *   Emphasize the innovative aspects and how advanced technologies (Llama 2, Neo4j) are used.
+*   Show dynamic group creation and group chat as a highlight.
 
 ---
