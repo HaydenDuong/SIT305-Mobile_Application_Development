@@ -371,17 +371,23 @@ def join_group():
 
     driver = get_neo4j_driver()
     with driver.session(database="neo4j") as session:
-        # Ensure user and group exist before creating relationship
-        user_exists = session.run("MATCH (u:User {id: $user_id}) RETURN u", user_id=user_id).single()
-        group_exists = session.run("MATCH (g:Group {name: $group_name}) RETURN g", group_name=group_name).single()
-
-        if not user_exists:
+        # Ensure user exists
+        user_exists_result = session.run("MATCH (u:User {id: $user_id}) RETURN u", user_id=user_id).single()
+        if not user_exists_result:
             return jsonify({"error": f"User with id '{user_id}' not found"}), 404
-        if not group_exists:
-            # Groups should ideally be created automatically when interests are added.
-            # If a group doesn't exist here, it implies an interest (and thus group) wasn't previously created.
-            return jsonify({"error": f"Group with name '{group_name}' not found. Groups are based on existing interests."}), 404
 
+        # Ensure Interest and corresponding Group exist, and Group is linked to Interest
+        # This makes the join operation more robust by creating the group if it was somehow missed.
+        session.run(
+            """
+            MERGE (i:Interest {name: $group_name}) // Interest name is the group name
+            MERGE (g:Group {name: $group_name})     // Ensure group exists
+            MERGE (g)-[:ABOUT]->(i)                 // Ensure group is linked to interest
+            """,
+            group_name=group_name
+        )
+
+        # Now, create the MEMBER_OF relationship
         session.run(
             """
             MATCH (u:User {id: $user_id}), (g:Group {name: $group_name})
