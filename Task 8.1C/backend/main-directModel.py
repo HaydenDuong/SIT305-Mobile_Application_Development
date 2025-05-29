@@ -568,6 +568,93 @@ def is_group_member():
     return jsonify({"isMember": is_member, "groupExistsAndQualifies": True}), 200
 
 
+def generate_chat_room_id(uid1, uid2):
+    uids = sorted([str(uid1), str(uid2)])
+    return f"{uids[0]}_{uids[1]}"
+
+@app.route('/direct_chat/send', methods=['POST'])
+def send_direct_message():
+    data = request.get_json()
+    sender_uid = data.get('sender_uid')
+    receiver_uid = data.get('receiver_uid')
+    message_text = data.get('message_text')
+
+    if not all([sender_uid, receiver_uid, message_text]):
+        return jsonify({"error": "sender_uid, receiver_uid, and message_text are required"}), 400
+
+    # Basic check if users exist (optional, but good practice)
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        sender_node = session.run("MATCH (u:User {id: $uid}) RETURN u", uid=sender_uid).single()
+        receiver_node = session.run("MATCH (u:User {id: $uid}) RETURN u", uid=receiver_uid).single()
+        if not sender_node:
+            return jsonify({"error": f"Sender with id '{sender_uid}' not found"}), 404
+        if not receiver_node:
+            return jsonify({"error": f"Receiver with id '{receiver_uid}' not found"}), 404
+
+        chat_room_id = generate_chat_room_id(sender_uid, receiver_uid)
+
+        result = session.run(
+            """
+            MATCH (sender:User {id: $sender_uid})
+            CREATE (msg:UserMessage {
+                text: $message_text,
+                senderId: $sender_uid,
+                receiverId: $receiver_uid, 
+                chatRoomId: $chat_room_id,
+                timestamp: datetime()
+            })
+            CREATE (sender)-[:SENT_MESSAGE]->(msg)
+            RETURN id(msg) AS messageId, msg.timestamp AS timestamp, msg.chatRoomId AS chatRoomId
+            """,
+            sender_uid=sender_uid,
+            receiver_uid=receiver_uid, # Not directly used in MATCH for message creation but good for context
+            message_text=message_text,
+            chat_room_id=chat_room_id
+        )
+        created_message_info = result.single()
+        if created_message_info:
+            return jsonify({
+                "status": "success",
+                "messageId": created_message_info["messageId"],
+                "timestamp": str(created_message_info["timestamp"]),
+                "chatRoomId": created_message_info["chatRoomId"]
+            }), 201
+        else:
+            return jsonify({"error": "Failed to create message in database"}), 500
+
+@app.route('/direct_chat/messages', methods=['GET'])
+def get_direct_messages():
+    uid1 = request.args.get('uid1')
+    uid2 = request.args.get('uid2')
+    limit = request.args.get('limit', default=50, type=int)
+
+    if not uid1 or not uid2:
+        return jsonify({"error": "uid1 and uid2 parameters are required"}), 400
+
+    chat_room_id = generate_chat_room_id(uid1, uid2)
+    messages = []
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        result = session.run(
+            """
+            MATCH (msg:UserMessage {chatRoomId: $chat_room_id})
+            RETURN msg.text AS text, msg.senderId AS senderId, msg.timestamp AS timestamp
+            ORDER BY msg.timestamp ASC 
+            LIMIT $limit
+            """,
+            chat_room_id=chat_room_id,
+            limit=limit
+        )
+        for record in result:
+            messages.append({
+                "text": record["text"],
+                "senderId": record["senderId"],
+                "timestamp": str(record["timestamp"])
+            })
+    return jsonify({"chatRoomId": chat_room_id, "messages": messages}), 200
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5000, help='Specify the port number')

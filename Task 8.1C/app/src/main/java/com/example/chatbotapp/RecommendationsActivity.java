@@ -29,7 +29,7 @@ import java.util.List;
 import android.app.AlertDialog;
 import android.content.Intent;
 
-public class RecommendationsActivity extends AppCompatActivity implements UserGroupAdapter.OnGroupClickListener {
+public class RecommendationsActivity extends AppCompatActivity implements UserGroupAdapter.OnGroupClickListener, RecommendedUserAdapter.OnChatButtonClickListener {
 
     private static final String TAG = "RecommendationsActivity";
     private RecyclerView recyclerViewRecommendedUsers;
@@ -75,7 +75,7 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
         // Setup Recommended Users RecyclerView
         recyclerViewRecommendedUsers = findViewById(R.id.recyclerViewRecommendedUsers);
         recyclerViewRecommendedUsers.setLayoutManager(new LinearLayoutManager(this));
-        recommendedUserAdapter = new RecommendedUserAdapter(recommendedUserList);
+        recommendedUserAdapter = new RecommendedUserAdapter(recommendedUserList, this);
         recyclerViewRecommendedUsers.setAdapter(recommendedUserAdapter);
 
         // Setup User Groups RecyclerView
@@ -279,6 +279,15 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
         Intent intent = new Intent(this, GroupChatActivity.class);
         intent.putExtra("GROUP_NAME", groupName);
         intent.putExtra("CURRENT_USER_ID", currentUserId);
+        startActivity(intent);
+    }
+
+    @Override
+    public void onChatButtonClick(RecommendedUser user) {
+        Intent intent = new Intent(this, DirectChatActivity.class);
+        intent.putExtra("CURRENT_USER_ID", currentUserId);
+        intent.putExtra("OTHER_USER_ID", user.getUserId());
+        intent.putExtra("OTHER_USER_DISPLAY_NAME", user.getUserId());
         startActivity(intent);
     }
 } 
