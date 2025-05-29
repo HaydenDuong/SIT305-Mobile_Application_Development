@@ -92,13 +92,14 @@ def chat():
     parsed_interests = []
     try:
         interest_prompt_template = (
-            "Instruction: Analyze ONLY the following 'User text' to extract distinct interests, hobbies, or topics. "
-            "Do NOT invent or list example interests if none are found in the 'User text'. "
-            "Output ONLY a comma-separated list (e.g., books, hiking, programming). "
-            "If no specific interests are evident IN THE PROVIDED 'User text', output the single word: NONE. "
-            "Do not add any explanation, numbering, or conversational filler. "
-            "User text: '{text}'"
-            "Interests:"
+            "Instructions for Interest Extraction:\n"
+            "1. Analyze the 'User Text' below to identify distinct interests, hobbies, or topics.\n"
+            "2. Output ONLY a comma-separated list of these interests (e.g., reading, travel, cooking).\n"
+            "3. If NO specific interests are found in the 'User Text', output ONLY the special token: __NONE__\n"
+            "4. Do NOT add any explanations, numbering, or conversational filler.\n"
+            "5. Do NOT include the token __NONE__ if actual interests are identified.\n\n"
+            "User Text:\n'''\n{text}\n'''\n\n"
+            "Extracted Interests (comma-separated or __NONE__):\n"
         )
         interest_extraction_prompt = interest_prompt_template.format(text=user_message)
         print(f"DEBUG - Interest Extraction Prompt: {interest_extraction_prompt}")
@@ -122,20 +123,51 @@ def chat():
         extracted_interests_text = tokenizer.decode(interest_outputs_generate[0][num_input_tokens_interest:], skip_special_tokens=True).strip()
         print(f"DEBUG - Raw Extracted Interests from LLM: '{extracted_interests_text}'")
 
-        first_line = extracted_interests_text.split('\n')[0].strip()
-        if first_line.upper() == "NONE" or first_line.upper() == "NONE.":
-            parsed_interests = []
+        # Take only the first meaningful line for interest extraction
+        first_line_llm = extracted_interests_text.split('\n')[0].strip()
+        parsed_interests = []
+
+        # Handle the special "no interest" marker (new and old, just in case)
+        # Convert to uppercase for case-insensitive comparison
+        first_line_upper = first_line_llm.upper()
+        if first_line_upper == "__NONE__" or first_line_upper == "NONE" or first_line_upper == "NONE.":
+            parsed_interests = [] # Explicitly no interests
         else:
-            # Remove quotes if present
-            if first_line.startswith("'") and first_line.endswith("'"):
-                first_line = first_line[1:-1]
-            if first_line.startswith("\"") and first_line.endswith("\""):
-                first_line = first_line[1:-1]
-            parsed_interests = [
-                interest.strip() for interest in first_line.split(',')
-                if interest.strip() and interest.strip().upper() not in ["NONE", "NONE."]
-            ]
-        print(f"DEBUG - Parsed Interests: {parsed_interests}")
+            # Remove potential surrounding single/double quotes from the whole line
+            if (first_line_llm.startswith("'") and first_line_llm.endswith("'")) or \
+               (first_line_llm.startswith("\"") and first_line_llm.endswith("\"")):
+                first_line_llm = first_line_llm[1:-1]
+
+            potential_interests_raw = first_line_llm.split(',')
+            
+            for item_raw in potential_interests_raw:
+                item = item_raw.strip() # General strip
+                if not item:  # Skip if item is empty after stripping
+                    continue
+
+                # Attempt to remove " NONE" or ".NONE" suffix if present with other text
+                # This specifically targets cases like "music NONE"
+                item_lower_check = item.lower()
+                if item_lower_check.endswith(" none"):
+                    item = item[:-5].strip() # Remove " none" (5 chars) and re-strip
+                elif item_lower_check.endswith(".none"): # Llama sometimes adds a period
+                    item = item[:-5].strip() # Remove ".none" (5 chars) and re-strip
+                
+                # Remove trailing periods from the cleaned item
+                if item.endswith('.'):
+                    item = item[:-1].strip()
+
+                # Final check: if item is not empty and not the "NONE" marker itself
+                # Store interests in a consistent case, e.g., lowercase
+                item_final_lower = item.lower()
+                if item_final_lower and item_final_lower not in ["none", "none.", "__none__"]:
+                    parsed_interests.append(item_final_lower)
+            
+            # Remove duplicates by converting to set and back to list, then sort
+            if parsed_interests:
+                parsed_interests = sorted(list(set(parsed_interests)))
+
+        print(f"DEBUG - Parsed Interests after refinement: {parsed_interests}")
 
     except Exception as e:
         print(f"Error during interest extraction: {str(e)}")
@@ -210,16 +242,32 @@ def chat():
 def update_user_interests_in_neo4j(uid, interests):
     driver = get_neo4j_driver()
     with driver.session(database="neo4j") as session:
+        # Ensure User node exists
         session.run("MERGE (u:User {id: $uid})", uid=uid)
-        for interest in interests:
+        
+        for interest_name in interests: # Renamed 'interest' to 'interest_name' for clarity
+            # Ensure Interest node exists
+            session.run("MERGE (i:Interest {name: $interest_name})", interest_name=interest_name)
+            
+            # Ensure User has HAS_INTEREST relationship to Interest
             session.run(
                 """
-                MERGE (i:Interest {name: $interest})
-                MERGE (u:User {id: $uid})
+                MATCH (u:User {id: $uid})
+                MATCH (i:Interest {name: $interest_name})
                 MERGE (u)-[:HAS_INTEREST]->(i)
                 """,
                 uid=uid,
-                interest=interest
+                interest_name=interest_name
+            )
+            
+            # Ensure Group node exists for the interest and is linked with ABOUT relationship
+            session.run(
+                """
+                MATCH (i:Interest {name: $interest_name})
+                MERGE (g:Group {name: $interest_name}) // Group name is same as interest name
+                MERGE (g)-[:ABOUT]->(i)
+                """,
+                interest_name=interest_name
             )
 
 # Endpoint to get user interests
@@ -282,6 +330,34 @@ def delete_interest():
             """
         )
     return jsonify({"status": "success", "deleted_interest": interest})
+
+@app.route('/recommendations/users', methods=['GET'])
+def get_user_recommendations():
+    user_id = request.args.get('user_id') # Or 'uid' depending on how you call it from client
+    if not user_id:
+        return jsonify({"error": "user_id parameter is required"}), 400
+
+    driver = get_neo4j_driver()
+    recommendations = []
+    with driver.session(database="neo4j") as session:
+        result = session.run(
+            """
+            MATCH (currentUser:User {id: $user_id})-[:HAS_INTEREST]->(interest:Interest)<-[:HAS_INTEREST]-(recommendedUser:User)
+            WHERE currentUser <> recommendedUser
+            WITH recommendedUser, COUNT(interest) AS commonInterests
+            ORDER BY commonInterests DESC
+            LIMIT 10 // You can make the limit configurable if needed
+            RETURN recommendedUser.id AS recommendedUserId, commonInterests
+            """,
+            user_id=user_id
+        )
+        for record in result:
+            recommendations.append({
+                "userId": record["recommendedUserId"],
+                "commonInterests": record["commonInterests"]
+            })
+    
+    return jsonify({"recommendations": recommendations})
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

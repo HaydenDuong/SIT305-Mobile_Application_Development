@@ -25,12 +25,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Store intent extras for later use in tab navigation
         userUidFromIntent = getIntent().getStringExtra("USER_UID");
         userDisplayNameFromIntent = getIntent().getStringExtra("USER_DISPLAY_NAME");
 
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.nav_host_fragment_container);
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
         navController = navHostFragment.getNavController();
 
         Bundle navArguments = new Bundle();
@@ -38,9 +36,7 @@ public class MainActivity extends AppCompatActivity {
         navArguments.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
         navController.setGraph(R.navigation.main_nav_graph, navArguments);
 
-        appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.userProfileFragment, R.id.chatFragment, R.id.groupChatFragment)
-                .build();
+        appBarConfiguration = new AppBarConfiguration.Builder(R.id.userProfileFragment, R.id.chatFragment, R.id.groupChatFragment).build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
@@ -59,8 +55,6 @@ public class MainActivity extends AppCompatActivity {
                     Bundle args = new Bundle();
                     args.putString("USER_UID", userUidFromIntent);
                     args.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
-                    // For Profile tab, arguments are already set via setGraph, but resupplying doesn't hurt
-                    // and makes logic consistent if we decide to navigate to profile from other tabs with args.
                     navController.navigate(tab.getId(), args);
                 }
             }
