@@ -1,5 +1,6 @@
 package com.example.chatbotapp;
 
+import android.content.Intent;
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -16,6 +17,7 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private String userUidFromIntent; // Store for tab navigation
     private String userDisplayNameFromIntent; // Store for tab navigation
+    private int lastSelectedFragmentTabPosition = 0; // To remember the last fragment tab
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +36,13 @@ public class MainActivity extends AppCompatActivity {
         Bundle navArguments = new Bundle();
         navArguments.putString("USER_UID", userUidFromIntent);
         navArguments.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
-        navController.setGraph(R.navigation.main_nav_graph, navArguments);
+        // Set graph only if it hasn't been set, to preserve state on config changes if nav controller persists
+        if (navController.getCurrentDestination() == null) {
+             navController.setGraph(R.navigation.main_nav_graph, navArguments);
+        }
 
-        appBarConfiguration = new AppBarConfiguration.Builder(R.id.userProfileFragment, R.id.chatFragment, R.id.groupChatFragment).build();
+        // Define top-level destinations for AppBarConfiguration (only those that are fragments in this host)
+        appBarConfiguration = new AppBarConfiguration.Builder(R.id.userProfileFragment, R.id.chatFragment).build(); 
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         TabLayout tabLayout = findViewById(R.id.tabLayout);
@@ -46,16 +52,33 @@ public class MainActivity extends AppCompatActivity {
     private void setupTabLayout(TabLayout tabLayout) {
         tabLayout.addTab(tabLayout.newTab().setText("Profile").setId(R.id.userProfileFragment));
         tabLayout.addTab(tabLayout.newTab().setText("AI Chat").setId(R.id.chatFragment));
-        tabLayout.addTab(tabLayout.newTab().setText("Group Chat").setId(R.id.groupChatFragment));
+        tabLayout.addTab(tabLayout.newTab().setText("Recommendations").setId(R.id.recommendations_tab_tag_id)); // Use new ID
 
         tabLayout.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() != tab.getId()) {
-                    Bundle args = new Bundle();
-                    args.putString("USER_UID", userUidFromIntent);
-                    args.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
-                    navController.navigate(tab.getId(), args);
+                int selectedTabId = tab.getId();
+                if (selectedTabId == R.id.recommendations_tab_tag_id) {
+                    Intent intent = new Intent(MainActivity.this, RecommendationsActivity.class);
+                    intent.putExtra("currentUserId", userUidFromIntent); // Pass UID if needed
+                    startActivity(intent);
+                    // After launching, re-select the previously active fragment tab
+                    // to avoid the Recommendations tab looking active while an activity is on top.
+                    if (tabLayout.getTabAt(lastSelectedFragmentTabPosition) != null) {
+                        tabLayout.getTabAt(lastSelectedFragmentTabPosition).select();
+                    }
+                } else {
+                    // Handle navigation for fragment tabs
+                    if (navController.getCurrentDestination() != null && navController.getCurrentDestination().getId() != selectedTabId) {
+                        Bundle args = new Bundle();
+                        args.putString("USER_UID", userUidFromIntent);
+                        args.putString("USER_DISPLAY_NAME", userDisplayNameFromIntent);
+                        navController.navigate(selectedTabId, args);
+                        // Update last selected fragment tab position
+                        if(tab.getPosition() < 2) { // Assuming first two tabs are fragments
+                           lastSelectedFragmentTabPosition = tab.getPosition();
+                        }
+                    }
                 }
             }
 
@@ -64,7 +87,11 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {
-                if (tab.getId() == R.id.userProfileFragment) {
+                 if (tab.getId() == R.id.recommendations_tab_tag_id) {
+                    Intent intent = new Intent(MainActivity.this, RecommendationsActivity.class);
+                    intent.putExtra("currentUserId", userUidFromIntent);
+                    startActivity(intent);
+                } else if (tab.getId() == R.id.userProfileFragment) {
                     NavHostFragment navHost = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_container);
                     if (navHost != null && navHost.getChildFragmentManager().getFragments().size() > 0) {
                         Fragment currentFragment = navHost.getChildFragmentManager().getFragments().get(0);
@@ -73,19 +100,36 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 }
+                // You might want to add reselection logic for AI Chat tab if needed
             }
         });
 
-        // Update selected tab when NavController destination changes
         navController.addOnDestinationChangedListener((controller, destination, arguments) -> {
+            boolean foundTab = false;
             for (int i = 0; i < tabLayout.getTabCount(); i++) {
                 TabLayout.Tab tab = tabLayout.getTabAt(i);
-                if (tab != null && tab.getId() == destination.getId()) {
+                // Only match fragment tabs with destinations in this NavController
+                if (tab != null && (tab.getId() == R.id.userProfileFragment || tab.getId() == R.id.chatFragment) && tab.getId() == destination.getId()) {
                     if (!tab.isSelected()) {
                         tab.select();
                     }
+                    if(i < 2) { // Update last selected for fragment tabs
+                        lastSelectedFragmentTabPosition = i;
+                    }
+                    foundTab = true;
                     break;
                 }
+            }
+            // If the destination is not one of the main fragment tabs (e.g. after launching RecommendationsActivity and coming back)
+            // ensure the correct fragment tab is selected based on lastSelectedFragmentTabPosition
+            if (!foundTab && tabLayout.getTabCount() > lastSelectedFragmentTabPosition) {
+                 TabLayout.Tab lastFragmentTab = tabLayout.getTabAt(lastSelectedFragmentTabPosition);
+                 if(lastFragmentTab != null && !lastFragmentTab.isSelected()) {
+                     // Only select if current destination is one of the fragment destinations
+                     if (destination.getId() == R.id.userProfileFragment || destination.getId() == R.id.chatFragment) {
+                          lastFragmentTab.select();
+                     }
+                 }
             }
         });
     }

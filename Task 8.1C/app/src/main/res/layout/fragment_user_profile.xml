@@ -60,18 +60,10 @@
             android:layout_below="@id/buttonChatWithAI_profileFrag"/>
 
         <Button
-            android:id="@+id/buttonChatWithGroup_profileFrag"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@id/buttonGoToRecommendations"
-            android:layout_marginTop="16dp"
-            android:text="Chat with Group (Coming Soon)" />
-
-        <Button
             android:id="@+id/buttonSignOut_profileFrag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/buttonChatWithGroup_profileFrag"
+            android:layout_below="@id/buttonGoToRecommendations"
             android:layout_marginTop="16dp"
             android:text="Sign Out" />
 

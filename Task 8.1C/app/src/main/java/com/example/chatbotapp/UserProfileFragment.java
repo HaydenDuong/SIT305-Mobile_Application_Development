@@ -2,7 +2,6 @@ package com.example.chatbotapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
@@ -30,11 +29,8 @@ public class UserProfileFragment extends Fragment {
     private TextView textViewEmail;
     private Button buttonChatWithAI;
     private Button buttonGoToRecommendations;
-    private Button buttonChatWithGroup;
     private Button buttonSignOut;
     private FrameLayout interestsFragmentContainer;
-
-    private View mainProfileContent; // To group card and buttons for easier visibility toggling
 
     private String userUid;
     private String userDisplayName;
@@ -106,7 +102,6 @@ public class UserProfileFragment extends Fragment {
         textViewEmail = view.findViewById(R.id.textViewEmail_profileFrag);
         buttonChatWithAI = view.findViewById(R.id.buttonChatWithAI_profileFrag);
         buttonGoToRecommendations = view.findViewById(R.id.buttonGoToRecommendations);
-        buttonChatWithGroup = view.findViewById(R.id.buttonChatWithGroup_profileFrag);
         buttonSignOut = view.findViewById(R.id.buttonSignOut_profileFrag);
         interestsFragmentContainer = view.findViewById(R.id.interests_fragment_container_profileFrag);
 
@@ -154,14 +149,6 @@ public class UserProfileFragment extends Fragment {
             }
         });
 
-        buttonChatWithGroup.setOnClickListener(v -> {
-             // Pass arguments to GroupChatFragment if needed
-            Bundle groupArgs = new Bundle();
-            groupArgs.putString("USER_UID", userUid);
-            navController.navigate(R.id.action_userProfileFragment_to_groupChatFragment, groupArgs);
-            // Toast.makeText(getContext(), "Group chat feature coming soon!", Toast.LENGTH_SHORT).show();
-        });
-
         buttonSignOut.setOnClickListener(v -> signOut());
 
         return view;
@@ -184,7 +171,6 @@ public class UserProfileFragment extends Fragment {
         userInfoCard.setVisibility(visibility);
         buttonChatWithAI.setVisibility(visibility);
         buttonGoToRecommendations.setVisibility(visibility);
-        buttonChatWithGroup.setVisibility(visibility);
         buttonSignOut.setVisibility(visibility);
     }
 
