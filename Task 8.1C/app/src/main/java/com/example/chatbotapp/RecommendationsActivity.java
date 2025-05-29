@@ -34,7 +34,7 @@ public class RecommendationsActivity extends AppCompatActivity {
     private List<UserGroup> userGroupList = new ArrayList<>();
     private RequestQueue requestQueue;
 
-    private String currentUserId = "user123"; // TODO: Get this dynamically (e.g., from SharedPreferences or Intent)
+    private String currentUserId;
     private String BASE_URL = "http://10.0.2.2:5000"; // For Android emulator to reach localhost
 
     @Override
@@ -43,6 +43,11 @@ public class RecommendationsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_recommendations);
 
         requestQueue = Volley.newRequestQueue(this);
+
+        currentUserId = getIntent().getStringExtra("currentUserId");
+        if (currentUserId == null || currentUserId.isEmpty()) {
+            Log.e(TAG, "Current User ID not passed in Intent!");
+        }
 
         // Setup Recommended Users RecyclerView
         recyclerViewRecommendedUsers = findViewById(R.id.recyclerViewRecommendedUsers);

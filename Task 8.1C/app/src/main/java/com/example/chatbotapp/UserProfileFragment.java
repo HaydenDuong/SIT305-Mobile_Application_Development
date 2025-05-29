@@ -129,9 +129,8 @@ public class UserProfileFragment extends Fragment {
         });
 
         buttonGoToRecommendations.setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), RecommendationsActivity.class);
-            // TODO: If needed, pass currentUserId via intent.putExtra("USER_ID", actualCurrentUserId)
-            startActivity(intent);
+            // Navigate to RecommendationsActivity
+            Navigation.findNavController(view).navigate(R.id.action_userProfileFragment_to_recommendationsActivity);
         });
 
         buttonChatWithGroup.setOnClickListener(v -> {
@@ -174,12 +173,7 @@ public class UserProfileFragment extends Fragment {
         buttonChatWithGroup.setVisibility(visibility);
         buttonSignOut.setVisibility(visibility);
     }
-    
-    /**
-     * Called by MainActivity when the Profile tab is reselected.
-     * @return true if the reselection was handled (InterestsFragment was visible and hidden),
-     *         false otherwise.
-     */
+
     public boolean handleProfileTabReselection() {
         if (interestsFragmentContainer.getVisibility() == View.VISIBLE) {
             getChildFragmentManager().popBackStack();

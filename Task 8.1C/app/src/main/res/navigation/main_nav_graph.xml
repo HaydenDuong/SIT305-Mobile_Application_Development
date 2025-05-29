@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_userProfileFragment_to_groupChatFragment"
             app:destination="@+id/groupChatFragment" />
+        <action
+            android:id="@+id/action_userProfileFragment_to_recommendationsActivity"
+            app:destination="@id/recommendationsActivity" />
     </fragment>
 
     <fragment
@@ -29,5 +32,15 @@
         android:name="com.example.chatbotapp.GroupChatFragment"
         android:label="Group Chat"
         tools:layout="@layout/fragment_group_chat" />
+
+    <activity
+        android:id="@+id/recommendationsActivity"
+        android:name="com.example.chatbotapp.RecommendationsActivity"
+        android:label="Suggestions"
+        tools:layout="@layout/activity_recommendations">
+        <argument
+            android:name="currentUserId"
+            app:argType="string" />
+    </activity>
 
 </navigation> 
