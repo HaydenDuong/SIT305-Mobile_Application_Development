@@ -158,28 +158,36 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
         JsonObjectRequest checkMembershipRequest = new JsonObjectRequest(Request.Method.GET, url, null,
                 response -> {
                     try {
+                        Log.d(TAG, "/groups/ismember response: " + response.toString());
+                        boolean groupExistsAndQualifies = response.optBoolean("groupExistsAndQualifies", false); // Default to false if not present
                         boolean isMember = response.getBoolean("isMember");
-                        if (isMember) {
-                            navigateToGroupChat(groupName);
+
+                        if (groupExistsAndQualifies) {
+                            if (isMember) {
+                                navigateToGroupChat(groupName);
+                            } else {
+                                showJoinGroupDialog(groupName);
+                            }
                         } else {
-                            showJoinGroupDialog(groupName);
+                            // Group doesn't qualify (e.g., not enough users share this interest)
+                            String message = response.optString("message", "This interest is not active as a group yet.");
+                            Toast.makeText(RecommendationsActivity.this, message, Toast.LENGTH_LONG).show();
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, "Error parsing isMember JSON: " + e.getMessage());
-                        Toast.makeText(this, "Error checking group membership.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error checking group status.", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
-                    Log.e(TAG, "Volley error checking membership: " + error.toString());
-                    // Handle case where /ismember endpoint might return 404 if group doesn't exist (though it should from user_interests)
-                    if (error.networkResponse != null && error.networkResponse.statusCode == 404) {
-                         // This case should ideally not happen if groupName comes from user's own interests which means groups exist.
-                         // But if it can, prompt to join directly or handle as an error.
-                        Log.w(TAG, "Group not found via /ismember, attempting to show join dialog anyway for: " + groupName);
-                        showJoinGroupDialog(groupName); 
-                    } else {
-                        Toast.makeText(this, "Error checking group membership.", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Volley error checking membership: " + error.toString() + (error.networkResponse != null ? " SC: " + error.networkResponse.statusCode : ""));
+                    // Handle case where /ismember endpoint might return 404 if group doesn't exist
+                    // This path might also be hit if the interest literally doesn't exist, which is unlikely if coming from user_interests
+                    String errorMsg = "Error checking group status.";
+                    if (error.networkResponse != null) {
+                        // You could refine error messages based on status code if needed
+                         errorMsg = "Could not retrieve group status (" + error.networkResponse.statusCode + ")";
                     }
+                    Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
                 }
         );
         requestQueue.add(checkMembershipRequest);
@@ -213,17 +221,37 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
                             Toast.makeText(this, "Successfully joined group: " + groupName, Toast.LENGTH_SHORT).show();
                             navigateToGroupChat(groupName);
                         } else {
+                            // This case might occur if backend sends success:false for some reason
                             String message = response.optString("message", "Failed to join group.");
                             Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
                         }
                     } catch (JSONException e) {
                         Log.e(TAG, "Error parsing joinGroup response: " + e.getMessage());
-                        Toast.makeText(this, "Error after joining group.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error after joining group (parsing).", Toast.LENGTH_SHORT).show();
                     }
                 },
                 error -> {
-                    Log.e(TAG, "Volley error joining group: " + error.toString());
-                    Toast.makeText(this, "Error joining group.", Toast.LENGTH_SHORT).show();
+                    String errorMessage = "Error joining group."; // Default message
+                    if (error.networkResponse != null) {
+                        Log.e(TAG, "Volley error joining group. Status Code: " + error.networkResponse.statusCode + " Data: " + (error.networkResponse.data != null ? new String(error.networkResponse.data) : "null"));
+                        if (error.networkResponse.statusCode == 409) { // Conflict
+                            try {
+                                String responseBody = new String(error.networkResponse.data, "utf-8");
+                                JSONObject errorJson = new JSONObject(responseBody);
+                                errorMessage = errorJson.optString("error", "This group isn't active or sharable yet.");
+                            } catch (Exception e) { // JSONException or UnsupportedEncodingException
+                                Log.e(TAG, "Error parsing 409 error response: " + e.getMessage());
+                                errorMessage = "This group cannot be joined at this time (not enough members or other issue).";
+                            }
+                        } else if (error.networkResponse.statusCode == 404) {
+                            errorMessage = "Group or user not found. Could not join.";
+                        } else {
+                            errorMessage = "Error joining group (Code: " + error.networkResponse.statusCode + ")";
+                        }
+                    } else {
+                        Log.e(TAG, "Volley error joining group (no network response): " + error.toString());
+                    }
+                    Toast.makeText(RecommendationsActivity.this, errorMessage, Toast.LENGTH_LONG).show();
                 }
         );
         requestQueue.add(joinGroupRequest);
