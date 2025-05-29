@@ -12,11 +12,12 @@ import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.chatbotapp.adapters.RecommendedUserAdapter;
+import com.example.chatbotapp.adapters.UserGroupAdapter;
+import com.example.chatbotapp.data.RecommendedUser;
+import com.example.chatbotapp.data.UserGroup;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -26,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 
 public class RecommendationsActivity extends AppCompatActivity implements UserGroupAdapter.OnGroupClickListener {

@@ -1,4 +1,4 @@
-package com.example.chatbotapp;
+package com.example.chatbotapp.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -15,6 +15,9 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.chatbotapp.LoginActivity;
+import com.example.chatbotapp.R;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import androidx.activity.OnBackPressedCallback;

@@ -1,4 +1,4 @@
-package com.example.chatbotapp;
+package com.example.chatbotapp.fragments;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chatbotapp.R;
 import com.example.chatbotapp.adapters.InterestsAdapter;
 import com.example.chatbotapp.network.ApiService;
 import com.example.chatbotapp.network.RetrofitClient;

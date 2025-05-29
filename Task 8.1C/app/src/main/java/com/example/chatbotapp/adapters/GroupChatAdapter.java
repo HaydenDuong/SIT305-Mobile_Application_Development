@@ -1,4 +1,4 @@
-package com.example.chatbotapp;
+package com.example.chatbotapp.adapters;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -6,6 +6,10 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.chatbotapp.data.GroupMessage;
+import com.example.chatbotapp.R;
+
 import java.util.List;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;

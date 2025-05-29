@@ -1,4 +1,4 @@
-package com.example.chatbotapp;
+package com.example.chatbotapp.data;
 
 public class GroupMessage {
     private String text;

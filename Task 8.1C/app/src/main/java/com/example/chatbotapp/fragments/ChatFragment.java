@@ -1,4 +1,4 @@
-package com.example.chatbotapp;
+package com.example.chatbotapp.fragments;
 
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -16,6 +16,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chatbotapp.R;
 import com.example.chatbotapp.adapters.ChatAdapter; // Assuming this is your adapter
 import com.example.chatbotapp.data.ChatMessage;   // Assuming this is your message model
 import com.example.chatbotapp.network.ApiService;
