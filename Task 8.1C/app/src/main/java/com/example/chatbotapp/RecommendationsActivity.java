@@ -1,6 +1,7 @@
 package com.example.chatbotapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -63,7 +64,7 @@ public class RecommendationsActivity extends AppCompatActivity {
 
         // Setup User Groups RecyclerView
         recyclerViewUserGroups = findViewById(R.id.recyclerViewUserGroups);
-        recyclerViewUserGroups.setLayoutManager(new LinearLayoutManager(this));
+        recyclerViewUserGroups.setLayoutManager(new GridLayoutManager(this, 2));
         userGroupAdapter = new UserGroupAdapter(userGroupList);
         recyclerViewUserGroups.setAdapter(userGroupAdapter);
 
@@ -87,7 +88,15 @@ public class RecommendationsActivity extends AppCompatActivity {
                             JSONObject recObject = recommendationsArray.getJSONObject(i);
                             String userId = recObject.getString("userId");
                             int commonInterests = recObject.getInt("commonInterests");
-                            newRecUsers.add(new RecommendedUser(userId, commonInterests));
+                            
+                            List<String> interestNames = new ArrayList<>();
+                            if (recObject.has("commonInterestNames")) { // Check if backend sends this field
+                                JSONArray namesArray = recObject.getJSONArray("commonInterestNames");
+                                for (int j = 0; j < namesArray.length(); j++) {
+                                    interestNames.add(namesArray.getString(j));
+                                }
+                            }
+                            newRecUsers.add(new RecommendedUser(userId, commonInterests, interestNames));
                         }
                         recommendedUserAdapter.updateData(newRecUsers);
                     } catch (JSONException e) {

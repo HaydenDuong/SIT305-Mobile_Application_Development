@@ -27,7 +27,7 @@ public class UserGroupAdapter extends RecyclerView.Adapter<UserGroupAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         UserGroup group = groupList.get(position);
-        holder.groupNameTextView.setText("Group: " + group.getGroupName());
+        holder.groupNameTextView.setText(group.getGroupName());
         // TODO: Set click listener for the item if needed
     }
 

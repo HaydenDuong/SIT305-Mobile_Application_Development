@@ -28,7 +28,15 @@ public class RecommendedUserAdapter extends RecyclerView.Adapter<RecommendedUser
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         RecommendedUser recommendedUser = recommendedUserList.get(position);
         holder.userIdTextView.setText("User ID: " + recommendedUser.getUserId());
-        holder.commonInterestsTextView.setText("Common Interests: " + recommendedUser.getCommonInterests());
+        holder.commonInterestsCountTextView.setText("Common Interests: " + recommendedUser.getCommonInterests());
+
+        if (recommendedUser.getCommonInterestNames() != null && !recommendedUser.getCommonInterestNames().isEmpty()) {
+            String interestNames = String.join(", ", recommendedUser.getCommonInterestNames());
+            holder.commonInterestNamesTextView.setText("Shared: " + interestNames);
+            holder.commonInterestNamesTextView.setVisibility(View.VISIBLE);
+        } else {
+            holder.commonInterestNamesTextView.setVisibility(View.GONE); // Hide if no specific names
+        }
         // TODO: Set click listener for the item if needed
     }
 
@@ -45,12 +53,14 @@ public class RecommendedUserAdapter extends RecyclerView.Adapter<RecommendedUser
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView userIdTextView;
-        TextView commonInterestsTextView;
+        TextView commonInterestsCountTextView;
+        TextView commonInterestNamesTextView;
 
         ViewHolder(View itemView) {
             super(itemView);
             userIdTextView = itemView.findViewById(R.id.textViewRecommendedUserId);
-            commonInterestsTextView = itemView.findViewById(R.id.textViewCommonInterests);
+            commonInterestsCountTextView = itemView.findViewById(R.id.textViewCommonInterestsCount);
+            commonInterestNamesTextView = itemView.findViewById(R.id.textViewCommonInterestNames);
         }
     }
 } 
