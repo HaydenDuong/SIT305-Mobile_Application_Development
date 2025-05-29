@@ -344,17 +344,18 @@ def get_user_recommendations():
             """
             MATCH (currentUser:User {id: $user_id})-[:HAS_INTEREST]->(interest:Interest)<-[:HAS_INTEREST]-(recommendedUser:User)
             WHERE currentUser <> recommendedUser
-            WITH recommendedUser, COUNT(interest) AS commonInterests
+            WITH recommendedUser, COUNT(interest) AS commonInterests, COLLECT(interest.name) AS commonInterestNames
             ORDER BY commonInterests DESC
             LIMIT 10 // You can make the limit configurable if needed
-            RETURN recommendedUser.id AS recommendedUserId, commonInterests
+            RETURN recommendedUser.id AS recommendedUserId, commonInterests, commonInterestNames
             """,
             user_id=user_id
         )
         for record in result:
             recommendations.append({
                 "userId": record["recommendedUserId"],
-                "commonInterests": record["commonInterests"]
+                "commonInterests": record["commonInterests"],
+                "commonInterestNames": record["commonInterestNames"]
             })
     
     return jsonify({"recommendations": recommendations})
