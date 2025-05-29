@@ -19,6 +19,9 @@ import android.widget.Toast;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import androidx.activity.OnBackPressedCallback;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 
 public class UserProfileFragment extends Fragment {
 
@@ -36,6 +39,9 @@ public class UserProfileFragment extends Fragment {
     private String userUid;
     private String userDisplayName;
     private String userEmail;
+
+    private GoogleSignInClient mGoogleSignInClient;
+    private FirebaseAuth mAuth;
 
     // Interface for MainActivity to communicate reselection
     public interface OnProfileTabReselectedListener {
@@ -79,6 +85,15 @@ public class UserProfileFragment extends Fragment {
             }
         };
         requireActivity().getOnBackPressedDispatcher().addCallback(this, onBackPressedCallback);
+
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id)) // Ensure this string resource exists
+                .requestEmail()
+                .build();
+        mGoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso);
+
+        mAuth = FirebaseAuth.getInstance(); // Initialize if using Firebase Auth
     }
 
     @Override
@@ -147,15 +162,7 @@ public class UserProfileFragment extends Fragment {
             // Toast.makeText(getContext(), "Group chat feature coming soon!", Toast.LENGTH_SHORT).show();
         });
 
-        buttonSignOut.setOnClickListener(v -> {
-            FirebaseAuth.getInstance().signOut();
-            Intent intent = new Intent(getActivity(), LoginActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            if (getActivity() != null) {
-                getActivity().finish();
-            }
-        });
+        buttonSignOut.setOnClickListener(v -> signOut());
 
         return view;
     }
@@ -199,5 +206,24 @@ public class UserProfileFragment extends Fragment {
         if (onBackPressedCallback != null) {
             onBackPressedCallback.remove();
         }
+    }
+
+    private void signOut() {
+        // Firebase sign out (if using)
+        if (mAuth.getCurrentUser() != null) { // Check if a user is signed in with Firebase
+            mAuth.signOut();
+        }
+
+        // Google sign out
+        mGoogleSignInClient.signOut().addOnCompleteListener(requireActivity(), task -> {
+            Toast.makeText(getContext(), "Signed out successfully", Toast.LENGTH_SHORT).show();
+            // Navigate back to LoginActivity or your desired entry point
+            Intent intent = new Intent(getActivity(), LoginActivity.class); // Replace LoginActivity with your actual login screen
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            if (getActivity() != null) {
+                getActivity().finishAffinity(); // Finish all activities in the task associated with this activity
+            }
+        });
     }
 } 

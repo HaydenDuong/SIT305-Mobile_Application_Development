@@ -16,6 +16,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@color/profile_background_purple"
             app:title="ChatConnect AI" />
 
         <com.google.android.material.tabs.TabLayout

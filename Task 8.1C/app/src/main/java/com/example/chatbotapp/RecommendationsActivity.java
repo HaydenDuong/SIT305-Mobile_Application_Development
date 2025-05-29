@@ -1,6 +1,7 @@
 package com.example.chatbotapp;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -42,10 +43,21 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
     private String currentUserId;
     private String BASE_URL = "http://10.0.2.2:5000"; // For Android emulator to reach localhost
 
+    private Toolbar toolbarRecommendations;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations);
+
+        toolbarRecommendations = findViewById(R.id.toolbarRecommendations);
+        setSupportActionBar(toolbarRecommendations);
+
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle("Recommendations");
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
 
         // Retrieve the currentUserId from the Intent
         currentUserId = getIntent().getStringExtra("currentUserId");
@@ -75,6 +87,12 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
         // Fetch data
         fetchRecommendedUsers();
         fetchUserInterestGroups();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     private void fetchRecommendedUsers() {

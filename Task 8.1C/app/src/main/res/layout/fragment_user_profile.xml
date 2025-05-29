@@ -1,79 +1,85 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
     tools:context=".UserProfileFragment">
 
-    <androidx.cardview.widget.CardView
-        android:id="@+id/userInfoCard_profileFrag"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        app:cardCornerRadius="8dp"
-        app:cardElevation="4dp"
-        app:contentPadding="16dp">
+        android:orientation="vertical"
+        android:padding="16dp">
 
-        <LinearLayout
+        <androidx.cardview.widget.CardView
+            android:id="@+id/userInfoCard_profileFrag"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_alignParentTop="true"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="4dp"
+            app:contentPadding="16dp">
 
-            <TextView
-                android:id="@+id/textViewUsername_profileFrag"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Username: "
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textViewEmail_profileFrag"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Email: "
-                android:textSize="16sp" />
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/textViewUsername_profileFrag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Username: "
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
 
-    <Button
-        android:id="@+id/buttonChatWithAI_profileFrag"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/userInfoCard_profileFrag"
-        android:layout_marginTop="24dp"
-        android:text="Chat with AI" />
+                <TextView
+                    android:id="@+id/textViewEmail_profileFrag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Email: "
+                    android:textSize="16sp" />
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-    <Button
-        android:id="@+id/buttonGoToRecommendations"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="View Recommendations"
-        android:layout_marginTop="16dp"
-        android:layout_below="@id/buttonChatWithAI_profileFrag"/>
+        <Button
+            android:id="@+id/buttonChatWithAI_profileFrag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/userInfoCard_profileFrag"
+            android:layout_marginTop="24dp"
+            android:text="Chat with AI" />
 
-    <Button
-        android:id="@+id/buttonChatWithGroup_profileFrag"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonGoToRecommendations"
-        android:layout_marginTop="16dp"
-        android:text="Chat with Group (Coming Soon)" />
+        <Button
+            android:id="@+id/buttonGoToRecommendations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View Recommendations"
+            android:layout_marginTop="16dp"
+            android:layout_below="@id/buttonChatWithAI_profileFrag"/>
 
-    <Button
-        android:id="@+id/buttonSignOut_profileFrag"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/buttonChatWithGroup_profileFrag"
-        android:layout_marginTop="16dp"
-        android:text="Sign Out" />
+        <Button
+            android:id="@+id/buttonChatWithGroup_profileFrag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonGoToRecommendations"
+            android:layout_marginTop="16dp"
+            android:text="Chat with Group (Coming Soon)" />
 
-    <FrameLayout
-        android:id="@+id/interests_fragment_container_profileFrag" 
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+        <Button
+            android:id="@+id/buttonSignOut_profileFrag"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/buttonChatWithGroup_profileFrag"
+            android:layout_marginTop="16dp"
+            android:text="Sign Out" />
 
-</RelativeLayout> 
+        <FrameLayout
+            android:id="@+id/interests_fragment_container_profileFrag" 
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone" />
+
+    </LinearLayout>
+</ScrollView> 

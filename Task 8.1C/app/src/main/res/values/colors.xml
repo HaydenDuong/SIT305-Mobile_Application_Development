@@ -7,4 +7,5 @@
     <color name="input_hint_text_color">#A0A0A0</color>
     <color name="input_text_color_dark">#333333</color>
     <color name="chat_bubble_background_light">#EFEFEF</color>
+    <color name="profile_background_purple">#6200EE</color>
 </resources>
