@@ -176,6 +176,7 @@ public class UserProfileFragment extends Fragment {
     private void setProfileContentVisibility(int visibility) {
         userInfoCard.setVisibility(visibility);
         buttonChatWithAI.setVisibility(visibility);
+        buttonGoToRecommendations.setVisibility(visibility);
         buttonChatWithGroup.setVisibility(visibility);
         buttonSignOut.setVisibility(visibility);
     }
