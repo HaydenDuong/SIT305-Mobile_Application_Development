@@ -28,6 +28,6 @@ def create_user_with_interests(user_id, interests):
 
 try:
     # Example usage
-    create_user_with_interests("user123", ["hiking", "guitar", "reading"])
+    create_user_with_interests("user A", ["hiking", "guitar", "reading"])
 finally:
     driver.close()

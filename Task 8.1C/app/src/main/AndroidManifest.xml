@@ -33,6 +33,9 @@
         <activity android:name=".RecommendationsActivity"
             android:label="Recommendations &amp; Groups" />
 
+        <activity android:name=".GroupChatActivity"
+            android:label="Group Chat" />
+
     </application>
 
 </manifest>

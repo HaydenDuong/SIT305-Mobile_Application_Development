@@ -258,11 +258,9 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
     }
 
     private void navigateToGroupChat(String groupName) {
-        // TODO: Create and navigate to GroupChatActivity
-        // Intent intent = new Intent(this, GroupChatActivity.class);
-        // intent.putExtra("GROUP_NAME", groupName);
-        // intent.putExtra("CURRENT_USER_ID", currentUserId);
-        // startActivity(intent);
-        Toast.makeText(this, "Navigating to group: " + groupName + " (Not implemented yet)", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, GroupChatActivity.class);
+        intent.putExtra("GROUP_NAME", groupName);
+        intent.putExtra("CURRENT_USER_ID", currentUserId);
+        startActivity(intent);
     }
 } 
