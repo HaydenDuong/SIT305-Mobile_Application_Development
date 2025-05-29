@@ -42,12 +42,18 @@ public class RecommendationsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_recommendations);
 
-        requestQueue = Volley.newRequestQueue(this);
-
+        // Retrieve the currentUserId from the Intent
         currentUserId = getIntent().getStringExtra("currentUserId");
         if (currentUserId == null || currentUserId.isEmpty()) {
-            Log.e(TAG, "Current User ID not passed in Intent!");
+            Log.e(TAG, "Current User ID not passed in Intent or is empty!");
+            Toast.makeText(this, "Error: User ID not provided.", Toast.LENGTH_LONG).show();
+            // Depending on your app's logic, you might want to finish the activity
+            // or prevent data fetching if the ID is crucial and missing.
+            // For now, let data fetching proceed which will likely fail or use a bad URL.
+            // Consider finishing the activity: finish(); return;
         }
+
+        requestQueue = Volley.newRequestQueue(this);
 
         // Setup Recommended Users RecyclerView
         recyclerViewRecommendedUsers = findViewById(R.id.recyclerViewRecommendedUsers);

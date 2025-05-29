@@ -130,7 +130,13 @@ public class UserProfileFragment extends Fragment {
 
         buttonGoToRecommendations.setOnClickListener(v -> {
             // Navigate to RecommendationsActivity
-            Navigation.findNavController(view).navigate(R.id.action_userProfileFragment_to_recommendationsActivity);
+            if (userUid != null && !userUid.isEmpty()) {
+                Bundle args = new Bundle();
+                args.putString("currentUserId", userUid); // Use the userUid from the fragment
+                Navigation.findNavController(view).navigate(R.id.action_userProfileFragment_to_recommendationsActivity, args);
+            } else {
+                Toast.makeText(getContext(), "User ID not available. Cannot fetch recommendations.", Toast.LENGTH_LONG).show();
+            }
         });
 
         buttonChatWithGroup.setOnClickListener(v -> {
