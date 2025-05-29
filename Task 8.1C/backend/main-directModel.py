@@ -421,6 +421,102 @@ def leave_group():
             return jsonify({"error": f"User '{user_id}' is not a member of group '{group_name}', or group/user does not exist."}), 404
 
 
+@app.route('/groups/message', methods=['POST'])
+def send_group_message():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    group_name = data.get('group_name')
+    message_text = data.get('message_text')
+
+    if not all([user_id, group_name, message_text]):
+        return jsonify({"error": "user_id, group_name, and message_text are required"}), 400
+
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        # Ensure user and group exist
+        user_node = session.run("MATCH (u:User {id: $user_id}) RETURN u", user_id=user_id).single()
+        group_node = session.run("MATCH (g:Group {name: $group_name}) RETURN g", group_name=group_name).single()
+
+        if not user_node:
+            return jsonify({"error": f"User '{user_id}' not found"}), 404
+        if not group_node:
+            return jsonify({"error": f"Group '{group_name}' not found"}), 404
+        
+        # Enforce that only members can post
+        is_member_result = session.run(
+            """MATCH (:User {id: $user_id})-[:MEMBER_OF]->(:Group {name: $group_name}) 
+               RETURN COUNT(*) > 0 AS isMember""",
+            user_id=user_id, group_name=group_name
+        )
+        is_member_check = is_member_result.single()
+
+        if not (is_member_check and is_member_check["isMember"]):
+            return jsonify({"error": f"User '{user_id}' is not a member of group '{group_name}' and cannot post messages."}), 403
+
+        # Create message and relationships
+        result = session.run(
+            """
+            MATCH (u:User {id: $user_id})
+            MATCH (g:Group {name: $group_name})
+            CREATE (msg:Message {text: $message_text, timestamp: datetime(), senderId: $user_id})
+            CREATE (msg)-[:IN_GROUP]->(g) // Changed from IN to IN_GROUP for clarity with Cypher's IN keyword
+            CREATE (u)-[:SENT_MESSAGE]->(msg)
+            RETURN msg.timestamp AS timestamp, id(msg) AS messageId
+            """,
+            user_id=user_id,
+            group_name=group_name,
+            message_text=message_text
+        )
+        created_message_info = result.single()
+        
+    return jsonify({
+        "status": "success", 
+        "message": "Message sent to group", 
+        "messageId": created_message_info["messageId"],
+        "timestamp": str(created_message_info["timestamp"])
+    }), 201
+
+
+@app.route('/groups/messages', methods=['GET'])
+def get_group_messages():
+    group_name = request.args.get('group_name')
+    if not group_name:
+        return jsonify({"error": "group_name parameter is required"}), 400
+
+    limit = request.args.get('limit', default=50, type=int) # Default to 50 messages, allow client to specify
+
+    driver = get_neo4j_driver()
+    messages = []
+    with driver.session(database="neo4j") as session:
+        # Ensure group exists
+        group_node = session.run("MATCH (g:Group {name: $group_name}) RETURN g", group_name=group_name).single()
+        if not group_node:
+            return jsonify({"error": f"Group '{group_name}' not found"}), 404
+
+        result = session.run(
+            """
+            MATCH (msg:Message)-[:IN_GROUP]->(g:Group {name: $group_name})
+            // OPTIONAL: To get sender's username if you store it on User node
+            // MATCH (sender:User {id: msg.senderId})
+            RETURN msg.text AS text, msg.senderId AS senderId, msg.timestamp AS timestamp //, sender.username AS senderUsername
+            ORDER BY msg.timestamp DESC // Show newest messages first, or ASC for oldest first
+            LIMIT $limit
+            """,
+            group_name=group_name,
+            limit=limit
+        )
+        for record in result:
+            messages.append({
+                "text": record["text"],
+                "senderId": record["senderId"],
+                "timestamp": str(record["timestamp"])
+            })
+        
+        # Messages are fetched in DESC order (newest first), so reverse for chronological display if needed by client
+        # Or client can handle ordering. For now, returning newest first.
+    return jsonify({"group_name": group_name, "messages": messages}), 200
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5000, help='Specify the port number')
