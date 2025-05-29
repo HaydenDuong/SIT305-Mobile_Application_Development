@@ -359,6 +359,68 @@ def get_user_recommendations():
     
     return jsonify({"recommendations": recommendations})
 
+@app.route('/groups/join', methods=['POST'])
+def join_group():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    group_name = data.get('group_name')
+
+    if not user_id or not group_name:
+        return jsonify({"error": "user_id and group_name are required"}), 400
+
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        # Ensure user and group exist before creating relationship
+        user_exists = session.run("MATCH (u:User {id: $user_id}) RETURN u", user_id=user_id).single()
+        group_exists = session.run("MATCH (g:Group {name: $group_name}) RETURN g", group_name=group_name).single()
+
+        if not user_exists:
+            return jsonify({"error": f"User with id '{user_id}' not found"}), 404
+        if not group_exists:
+            # Groups should ideally be created automatically when interests are added.
+            # If a group doesn't exist here, it implies an interest (and thus group) wasn't previously created.
+            return jsonify({"error": f"Group with name '{group_name}' not found. Groups are based on existing interests."}), 404
+
+        session.run(
+            """
+            MATCH (u:User {id: $user_id}), (g:Group {name: $group_name})
+            MERGE (u)-[:MEMBER_OF]->(g)
+            """,
+            user_id=user_id,
+            group_name=group_name
+        )
+    return jsonify({"status": "success", "message": f"User '{user_id}' joined group '{group_name}'"}), 200
+
+
+@app.route('/groups/leave', methods=['POST'])
+def leave_group():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    group_name = data.get('group_name')
+
+    if not user_id or not group_name:
+        return jsonify({"error": "user_id and group_name are required"}), 400
+
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        # Check if the relationship exists before trying to delete
+        result = session.run(
+            """
+            MATCH (u:User {id: $user_id})-[r:MEMBER_OF]->(g:Group {name: $group_name})
+            DELETE r
+            RETURN COUNT(r) AS deleted_count
+            """,
+            user_id=user_id,
+            group_name=group_name
+        )
+        deleted_count = result.single()["deleted_count"]
+        
+        if deleted_count > 0:
+            return jsonify({"status": "success", "message": f"User '{user_id}' left group '{group_name}'"}), 200
+        else:
+            return jsonify({"error": f"User '{user_id}' is not a member of group '{group_name}', or group/user does not exist."}), 404
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5000, help='Specify the port number')
