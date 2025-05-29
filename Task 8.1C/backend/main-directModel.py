@@ -518,6 +518,28 @@ def get_group_messages():
     return jsonify({"group_name": group_name, "messages": messages}), 200
 
 
+@app.route('/groups/ismember', methods=['GET'])
+def is_group_member():
+    user_id = request.args.get('user_id')
+    group_name = request.args.get('group_name')
+
+    if not user_id or not group_name:
+        return jsonify({"error": "user_id and group_name parameters are required"}), 400
+
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        result = session.run(
+            """MATCH (u:User {id: $user_id})-[:MEMBER_OF]->(g:Group {name: $group_name})
+               RETURN COUNT(u) > 0 AS isMember""",
+            user_id=user_id,
+            group_name=group_name
+        )
+        record = result.single()
+        is_member = record["isMember"] if record else False
+        # If the query returns no record (user or group doesn't exist, or no relationship), isMember will be false.
+    return jsonify({"isMember": is_member}), 200
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--port', type=int, default=5000, help='Specify the port number')

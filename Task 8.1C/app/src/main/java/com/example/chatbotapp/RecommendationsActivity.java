@@ -24,7 +24,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RecommendationsActivity extends AppCompatActivity {
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+
+public class RecommendationsActivity extends AppCompatActivity implements UserGroupAdapter.OnGroupClickListener {
 
     private static final String TAG = "RecommendationsActivity";
     private RecyclerView recyclerViewRecommendedUsers;
@@ -65,7 +69,7 @@ public class RecommendationsActivity extends AppCompatActivity {
         // Setup User Groups RecyclerView
         recyclerViewUserGroups = findViewById(R.id.recyclerViewUserGroups);
         recyclerViewUserGroups.setLayoutManager(new GridLayoutManager(this, 2));
-        userGroupAdapter = new UserGroupAdapter(userGroupList);
+        userGroupAdapter = new UserGroupAdapter(userGroupList, this);
         recyclerViewUserGroups.setAdapter(userGroupAdapter);
 
         // Fetch data
@@ -139,5 +143,98 @@ public class RecommendationsActivity extends AppCompatActivity {
                 }
         );
         requestQueue.add(jsonObjectRequest);
+    }
+
+    @Override
+    public void onGroupClick(UserGroup group) {
+        Toast.makeText(this, "Clicked on group: " + group.getGroupName(), Toast.LENGTH_SHORT).show();
+        checkGroupMembershipAndProceed(group.getGroupName());
+    }
+
+    private void checkGroupMembershipAndProceed(String groupName) {
+        String url = BASE_URL + "/groups/ismember?user_id=" + currentUserId + "&group_name=" + groupName;
+        Log.d(TAG, "Checking membership for group: " + groupName + " from URL: " + url);
+
+        JsonObjectRequest checkMembershipRequest = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        boolean isMember = response.getBoolean("isMember");
+                        if (isMember) {
+                            navigateToGroupChat(groupName);
+                        } else {
+                            showJoinGroupDialog(groupName);
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing isMember JSON: " + e.getMessage());
+                        Toast.makeText(this, "Error checking group membership.", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Volley error checking membership: " + error.toString());
+                    // Handle case where /ismember endpoint might return 404 if group doesn't exist (though it should from user_interests)
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 404) {
+                         // This case should ideally not happen if groupName comes from user's own interests which means groups exist.
+                         // But if it can, prompt to join directly or handle as an error.
+                        Log.w(TAG, "Group not found via /ismember, attempting to show join dialog anyway for: " + groupName);
+                        showJoinGroupDialog(groupName); 
+                    } else {
+                        Toast.makeText(this, "Error checking group membership.", Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+        requestQueue.add(checkMembershipRequest);
+    }
+
+    private void showJoinGroupDialog(String groupName) {
+        new AlertDialog.Builder(this)
+                .setTitle("Join Group")
+                .setMessage("Do you want to join the '" + groupName + "' group?")
+                .setPositiveButton("Yes", (dialog, which) -> joinGroupAndProceed(groupName))
+                .setNegativeButton("No", null)
+                .show();
+    }
+
+    private void joinGroupAndProceed(String groupName) {
+        String url = BASE_URL + "/groups/join";
+        JSONObject requestBody = new JSONObject();
+        try {
+            requestBody.put("user_id", currentUserId);
+            requestBody.put("group_name", groupName);
+        } catch (JSONException e) {
+            Log.e(TAG, "Error creating joinGroup request body: " + e.getMessage());
+            return;
+        }
+
+        JsonObjectRequest joinGroupRequest = new JsonObjectRequest(Request.Method.POST, url, requestBody,
+                response -> {
+                    try {
+                        String status = response.getString("status");
+                        if ("success".equals(status)) {
+                            Toast.makeText(this, "Successfully joined group: " + groupName, Toast.LENGTH_SHORT).show();
+                            navigateToGroupChat(groupName);
+                        } else {
+                            String message = response.optString("message", "Failed to join group.");
+                            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException e) {
+                        Log.e(TAG, "Error parsing joinGroup response: " + e.getMessage());
+                        Toast.makeText(this, "Error after joining group.", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    Log.e(TAG, "Volley error joining group: " + error.toString());
+                    Toast.makeText(this, "Error joining group.", Toast.LENGTH_SHORT).show();
+                }
+        );
+        requestQueue.add(joinGroupRequest);
+    }
+
+    private void navigateToGroupChat(String groupName) {
+        // TODO: Create and navigate to GroupChatActivity
+        // Intent intent = new Intent(this, GroupChatActivity.class);
+        // intent.putExtra("GROUP_NAME", groupName);
+        // intent.putExtra("CURRENT_USER_ID", currentUserId);
+        // startActivity(intent);
+        Toast.makeText(this, "Navigating to group: " + groupName + " (Not implemented yet)", Toast.LENGTH_LONG).show();
     }
 } 

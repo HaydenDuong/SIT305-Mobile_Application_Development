@@ -11,24 +11,29 @@ import java.util.List;
 public class UserGroupAdapter extends RecyclerView.Adapter<UserGroupAdapter.ViewHolder> {
 
     private List<UserGroup> groupList;
-    // TODO: Add a click listener interface if needed
+    private OnGroupClickListener onGroupClickListener;
 
-    public UserGroupAdapter(List<UserGroup> groupList) {
+    // Interface for click events
+    public interface OnGroupClickListener {
+        void onGroupClick(UserGroup group);
+    }
+
+    public UserGroupAdapter(List<UserGroup> groupList, OnGroupClickListener listener) {
         this.groupList = groupList;
+        this.onGroupClickListener = listener;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_group, parent, false);
-        return new ViewHolder(view);
+        return new ViewHolder(view, onGroupClickListener, groupList);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         UserGroup group = groupList.get(position);
         holder.groupNameTextView.setText(group.getGroupName());
-        // TODO: Set click listener for the item if needed
     }
 
     @Override
@@ -45,9 +50,15 @@ public class UserGroupAdapter extends RecyclerView.Adapter<UserGroupAdapter.View
     static class ViewHolder extends RecyclerView.ViewHolder {
         TextView groupNameTextView;
 
-        ViewHolder(View itemView) {
+        ViewHolder(View itemView, OnGroupClickListener listener, List<UserGroup> currentGroupList) {
             super(itemView);
             groupNameTextView = itemView.findViewById(R.id.textViewGroupName);
+            itemView.setOnClickListener(v -> {
+                int position = getAdapterPosition();
+                if (listener != null && position != RecyclerView.NO_POSITION) {
+                    listener.onGroupClick(currentGroupList.get(position));
+                }
+            });
         }
     }
 } 
