@@ -29,6 +29,10 @@
         <activity
             android:name=".MainActivity" 
             android:exported="false" />
+
+        <activity android:name=".RecommendationsActivity"
+            android:label="Recommendations &amp; Groups" />
+
     </application>
 
 </manifest>

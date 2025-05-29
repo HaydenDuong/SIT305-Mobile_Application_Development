@@ -26,6 +26,7 @@ public class UserProfileFragment extends Fragment {
     private TextView textViewUsername;
     private TextView textViewEmail;
     private Button buttonChatWithAI;
+    private Button buttonGoToRecommendations;
     private Button buttonChatWithGroup;
     private Button buttonSignOut;
     private FrameLayout interestsFragmentContainer;
@@ -89,14 +90,10 @@ public class UserProfileFragment extends Fragment {
         textViewUsername = view.findViewById(R.id.textViewUsername_profileFrag);
         textViewEmail = view.findViewById(R.id.textViewEmail_profileFrag);
         buttonChatWithAI = view.findViewById(R.id.buttonChatWithAI_profileFrag);
+        buttonGoToRecommendations = view.findViewById(R.id.buttonGoToRecommendations);
         buttonChatWithGroup = view.findViewById(R.id.buttonChatWithGroup_profileFrag);
         buttonSignOut = view.findViewById(R.id.buttonSignOut_profileFrag);
         interestsFragmentContainer = view.findViewById(R.id.interests_fragment_container_profileFrag);
-
-        // Grouping main content for easier show/hide
-        // In fragment_user_profile.xml, you might want to wrap userInfoCard and the three buttons
-        // in a LinearLayout or some other ViewGroup and give it an ID to simplify this.
-        // For now, I'll handle them individually.
 
         // Set user details
         if (userDisplayName != null && !userDisplayName.isEmpty()) {
@@ -129,6 +126,12 @@ public class UserProfileFragment extends Fragment {
             chatArgs.putString("USER_UID", userUid);
             chatArgs.putString("USER_DISPLAY_NAME", userDisplayName);
             navController.navigate(R.id.action_userProfileFragment_to_chatFragment, chatArgs);
+        });
+
+        buttonGoToRecommendations.setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), RecommendationsActivity.class);
+            // TODO: If needed, pass currentUserId via intent.putExtra("USER_ID", actualCurrentUserId)
+            startActivity(intent);
         });
 
         buttonChatWithGroup.setOnClickListener(v -> {

@@ -59,8 +59,6 @@ dependencies {
 
     // Firebase Authentication
     implementation(libs.firebase.auth)
-    // Optionally, if you want Firebase UI for easy sign-in screens (not required if building custom UI)
-    // implementation("com.firebaseui:firebase-ui-auth:8.0.0") // Check for latest version
 
     implementation("com.google.android.gms:play-services-auth:21.3.0")
     implementation(libs.navigation.fragment)
@@ -69,6 +67,8 @@ dependencies {
     implementation("androidx.navigation:navigation-fragment-ktx:2.9.0")
     implementation("androidx.navigation:navigation-ui-ktx:2.9.0")
     implementation("com.google.android.material:material:1.12.0")
+
+    implementation("com.android.volley:volley:1.2.1")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
