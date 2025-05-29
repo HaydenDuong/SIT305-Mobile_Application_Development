@@ -260,16 +260,6 @@ def update_user_interests_in_neo4j(uid, interests):
                 interest_name=interest_name
             )
             
-            # Ensure Group node exists for the interest and is linked with ABOUT relationship
-            session.run(
-                """
-                MATCH (i:Interest {name: $interest_name})
-                MERGE (g:Group {name: $interest_name}) // Group name is same as interest name
-                MERGE (g)-[:ABOUT]->(i)
-                """,
-                interest_name=interest_name
-            )
-
 # Endpoint to get user interests
 @app.route('/user_interests')
 def user_interests():
@@ -376,15 +366,25 @@ def join_group():
         if not user_exists_result:
             return jsonify({"error": f"User with id '{user_id}' not found"}), 404
 
-        # Ensure Interest and corresponding Group exist, and Group is linked to Interest
-        # This makes the join operation more robust by creating the group if it was somehow missed.
+        # Check if the interest (group_name) is shared by at least 2 users
+        shared_check_result = session.run(
+            """MATCH (i:Interest {name: $interest_name})<-[:HAS_INTEREST]-(u:User)
+               WITH i, COUNT(DISTINCT u) AS userCount
+               RETURN userCount >= 2 AS isSharableGroup, i.name AS interestName""",
+            interest_name=group_name
+        )
+        shared_record = shared_check_result.single()
+        
+        if not (shared_record and shared_record["isSharableGroup"]):
+            return jsonify({"error": f"Cannot join group. Interest '{group_name}' is not shared by enough users yet."}), 409 # 409 Conflict or 400
+
+        # If sharable, ensure the Group node and its ABOUT relationship exist
+        # The interestName from the query confirms the interest node exists.
         session.run(
-            """
-            MERGE (i:Interest {name: $group_name}) // Interest name is the group name
-            MERGE (g:Group {name: $group_name})     // Ensure group exists
-            MERGE (g)-[:ABOUT]->(i)                 // Ensure group is linked to interest
-            """,
-            group_name=group_name
+            '''MERGE (i:Interest {name: $interest_name})
+               MERGE (g:Group {name: $interest_name}) 
+               MERGE (g)-[:ABOUT]->(i)''',
+            interest_name=shared_record["interestName"]
         )
 
         # Now, create the MEMBER_OF relationship
@@ -527,23 +527,45 @@ def get_group_messages():
 @app.route('/groups/ismember', methods=['GET'])
 def is_group_member():
     user_id = request.args.get('user_id')
-    group_name = request.args.get('group_name')
+    group_name = request.args.get('group_name') # This is an interest name
 
     if not user_id or not group_name:
         return jsonify({"error": "user_id and group_name parameters are required"}), 400
 
     driver = get_neo4j_driver()
     with driver.session(database="neo4j") as session:
-        result = session.run(
+        # Check if the interest (group_name) is shared by at least 2 users
+        shared_check_result = session.run(
+            """MATCH (i:Interest {name: $interest_name})<-[:HAS_INTEREST]-(u:User)
+               WITH i, COUNT(DISTINCT u) AS userCount
+               RETURN userCount >= 2 AS isSharableGroup""",
+            interest_name=group_name
+        )
+        shared_record = shared_check_result.single()
+        is_sharable_group = shared_record["isSharableGroup"] if shared_record else False
+
+        if not is_sharable_group:
+            return jsonify({"isMember": False, "groupExistsAndQualifies": False, "message": "Interest not shared by enough users to form a group."}), 200
+
+        # If sharable, ensure the Group node and its ABOUT relationship exist
+        session.run(
+            """MERGE (i:Interest {name: $interest_name})
+               MERGE (g:Group {name: $interest_name})
+               MERGE (g)-[:ABOUT]->(i)""",
+            interest_name=group_name
+        )
+
+        # Now check actual membership
+        membership_result = session.run(
             """MATCH (u:User {id: $user_id})-[:MEMBER_OF]->(g:Group {name: $group_name})
                RETURN COUNT(u) > 0 AS isMember""",
             user_id=user_id,
             group_name=group_name
         )
-        record = result.single()
-        is_member = record["isMember"] if record else False
-        # If the query returns no record (user or group doesn't exist, or no relationship), isMember will be false.
-    return jsonify({"isMember": is_member}), 200
+        member_record = membership_result.single()
+        is_member = member_record["isMember"] if member_record else False
+        
+    return jsonify({"isMember": is_member, "groupExistsAndQualifies": True}), 200
 
 
 if __name__ == '__main__':
