@@ -78,14 +78,15 @@ def index():
 def chat():
     global llm_model, tokenizer
 
-    # Get user_id from form or JSON
     user_id = request.form.get('user_id') or (request.json.get('user_id') if request.is_json else None)
+    # Expect displayName from the client now
+    display_name = request.form.get('displayName') or (request.json.get('displayName') if request.is_json else None) 
     user_message = request.form.get('userMessage') or (request.json.get('userMessage') if request.is_json else request.get_data(as_text=True).strip())
 
-    if not user_id or not user_message:
+    if not user_id or not user_message: # displayName can be optional initially, but good to have
         return Response("Error: user_id and userMessage are required", status=400, mimetype='text/plain')
 
-    print(f"\nReceived User Message: {user_message} (from user: {user_id})")
+    print(f"\nReceived User Message: {user_message} (from user: {user_id}, name: {display_name})")
 
     # --- Section 1: Interest Extraction ---
     extracted_interests_text = "NONE" # Default
@@ -174,9 +175,12 @@ def chat():
         # parsed_interests remains []
 
     # --- Neo4j Integration: Store user and interests ---
-    if parsed_interests:
-        update_user_interests_in_neo4j(user_id, parsed_interests)
+    if parsed_interests: # Also update/set displayName when updating interests
+        update_user_interests_in_neo4j(user_id, parsed_interests, display_name if display_name else user_id) # Pass displayName
         print(f"Stored/updated interests for user {user_id}: {parsed_interests}")
+    elif display_name: # If no interests extracted, but display name is provided, still update user node
+        # This ensures user node gets displayName even without new interests in this message
+        update_user_node_display_name(user_id, display_name)
 
     # --- Section 2: Chat Response Generation ---
     # Use the original user_message as the prompt for a conversational response
@@ -239,13 +243,20 @@ def chat():
     return Response(final_app_response, mimetype='text/plain')
 
 
-def update_user_interests_in_neo4j(uid, interests):
+def update_user_node_display_name(uid, displayName):
     driver = get_neo4j_driver()
     with driver.session(database="neo4j") as session:
-        # Ensure User node exists
-        session.run("MERGE (u:User {id: $uid})", uid=uid)
+        session.run("MERGE (u:User {id: $uid}) SET u.displayName = $displayName", uid=uid, displayName=displayName)
+        print(f"Updated displayName for user {uid} to {displayName}")
+
+def update_user_interests_in_neo4j(uid, interests, displayName):
+    driver = get_neo4j_driver()
+    with driver.session(database="neo4j") as session:
+        # Ensure User node exists and set/update displayName
+        session.run("MERGE (u:User {id: $uid}) SET u.displayName = $displayName", 
+                    uid=uid, displayName=displayName)
         
-        for interest_name in interests: # Renamed 'interest' to 'interest_name' for clarity
+        for interest_name in interests: 
             # Ensure Interest node exists
             session.run("MERGE (i:Interest {name: $interest_name})", interest_name=interest_name)
             
@@ -323,7 +334,7 @@ def delete_interest():
 
 @app.route('/recommendations/users', methods=['GET'])
 def get_user_recommendations():
-    user_id = request.args.get('user_id') # Or 'uid' depending on how you call it from client
+    user_id = request.args.get('user_id') 
     if not user_id:
         return jsonify({"error": "user_id parameter is required"}), 400
 
@@ -336,14 +347,18 @@ def get_user_recommendations():
             WHERE currentUser <> recommendedUser
             WITH recommendedUser, COUNT(interest) AS commonInterests, COLLECT(interest.name) AS commonInterestNames
             ORDER BY commonInterests DESC
-            LIMIT 10 // You can make the limit configurable if needed
-            RETURN recommendedUser.id AS recommendedUserId, commonInterests, commonInterestNames
+            LIMIT 10 
+            RETURN recommendedUser.id AS recommendedUserId, 
+                   recommendedUser.displayName AS recommendedUserDisplayName, 
+                   commonInterests, 
+                   commonInterestNames
             """,
             user_id=user_id
         )
         for record in result:
             recommendations.append({
                 "userId": record["recommendedUserId"],
+                "displayName": record["recommendedUserDisplayName"],
                 "commonInterests": record["commonInterests"],
                 "commonInterestNames": record["commonInterestNames"]
             })

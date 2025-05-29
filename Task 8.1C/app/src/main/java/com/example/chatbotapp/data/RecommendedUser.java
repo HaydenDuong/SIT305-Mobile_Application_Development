@@ -4,11 +4,13 @@ import java.util.List;
 
 public class RecommendedUser {
     private String userId;
+    private String displayName;
     private int commonInterests;
     private List<String> commonInterestNames;
 
-    public RecommendedUser(String userId, int commonInterests, List<String> commonInterestNames) {
+    public RecommendedUser(String userId, String displayName, int commonInterests, List<String> commonInterestNames) {
         this.userId = userId;
+        this.displayName = displayName;
         this.commonInterests = commonInterests;
         this.commonInterestNames = commonInterestNames;
     }
@@ -17,8 +19,8 @@ public class RecommendedUser {
         return userId;
     }
 
-    public void setUserId(String userId) {
-        this.userId = userId;
+    public String getDisplayName() {
+        return displayName;
     }
 
     public int getCommonInterests() {

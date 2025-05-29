@@ -123,7 +123,7 @@ public class ChatFragment extends Fragment {
              return;
         }
 
-        Call<String> call = apiService.sendMessage(currentUserUid, messageText);
+        Call<String> call = apiService.sendMessage(currentUserUid, currentUserDisplayName, messageText);
         call.enqueue(new Callback<String>() {
             @Override
             public void onResponse(@NonNull Call<String> call, @NonNull Response<String> response) {

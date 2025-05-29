@@ -109,6 +109,7 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
                         for (int i = 0; i < recommendationsArray.length(); i++) {
                             JSONObject recObject = recommendationsArray.getJSONObject(i);
                             String userId = recObject.getString("userId");
+                            String displayName = recObject.optString("displayName", userId); // Get displayName, fallback to userId
                             int commonInterests = recObject.getInt("commonInterests");
                             
                             List<String> interestNames = new ArrayList<>();
@@ -118,7 +119,7 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
                                     interestNames.add(namesArray.getString(j));
                                 }
                             }
-                            newRecUsers.add(new RecommendedUser(userId, commonInterests, interestNames));
+                            newRecUsers.add(new RecommendedUser(userId, displayName, commonInterests, interestNames)); // Pass displayName
                         }
                         recommendedUserAdapter.updateData(newRecUsers);
                     } catch (JSONException e) {
@@ -287,7 +288,7 @@ public class RecommendationsActivity extends AppCompatActivity implements UserGr
         Intent intent = new Intent(this, DirectChatActivity.class);
         intent.putExtra("CURRENT_USER_ID", currentUserId);
         intent.putExtra("OTHER_USER_ID", user.getUserId());
-        intent.putExtra("OTHER_USER_DISPLAY_NAME", user.getUserId());
+        intent.putExtra("OTHER_USER_DISPLAY_NAME", user.getDisplayName());
         startActivity(intent);
     }
 } 

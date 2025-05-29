@@ -56,19 +56,51 @@ public class UserProfileFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Retrieve arguments passed from MainActivity (or NavController)
+
+        String displayNameFromArgs = null;
         if (getArguments() != null) {
             userUid = getArguments().getString("USER_UID");
-            userDisplayName = getArguments().getString("USER_DISPLAY_NAME");
+            displayNameFromArgs = getArguments().getString("USER_DISPLAY_NAME");
         }
+
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
             userEmail = currentUser.getEmail();
-            if (userUid == null) userUid = currentUser.getUid(); // Ensure UID is set
-            if ((userDisplayName == null || userDisplayName.isEmpty()) && userEmail != null) {
-                 userDisplayName = userEmail.split("@")[0];
+            if (userUid == null) { // If UID wasn't in args, get from Firebase
+                userUid = currentUser.getUid();
             }
+
+            // Prioritize FirebaseUser's display name if available
+            if (currentUser.getDisplayName() != null && !currentUser.getDisplayName().isEmpty()) {
+                userDisplayName = currentUser.getDisplayName();
+            } else if (displayNameFromArgs != null && !displayNameFromArgs.isEmpty()) {
+                // Fallback to display name from arguments
+                userDisplayName = displayNameFromArgs;
+            } else if (userEmail != null) {
+                // Further fallback to email local part
+                userDisplayName = userEmail.split("@")[0];
+            } else {
+                userDisplayName = "User"; // Absolute fallback
+            }
+        } else {
+            // No Firebase user, rely on args or defaults
+            userUid = (userUid != null) ? userUid : "UnknownUID";
+            userDisplayName = (displayNameFromArgs != null && !displayNameFromArgs.isEmpty()) ? displayNameFromArgs : "Guest";
+            userEmail = "No email";
         }
+
+        //if (getArguments() != null) {
+        //    userUid = getArguments().getString("USER_UID");
+        //    userDisplayName = getArguments().getString("USER_DISPLAY_NAME");
+        //}
+        //FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        //if (currentUser != null) {
+        //    userEmail = currentUser.getEmail();
+        //    if (userUid == null) userUid = currentUser.getUid(); // Ensure UID is set
+        //    if ((userDisplayName == null || userDisplayName.isEmpty()) && userEmail != null) {
+        //         userDisplayName = userEmail.split("@")[0];
+        //    }
+        //}
 
         // Handle back press when InterestsFragment is shown
         onBackPressedCallback = new OnBackPressedCallback(false) { // Initially disabled

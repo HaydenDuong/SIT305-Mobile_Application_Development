@@ -14,6 +14,7 @@ public interface ApiService {
     @POST("chat")
     Call<String> sendMessage(
             @Field("user_id") String userId,
+            @Field("displayName") String displayName,
             @Field("userMessage") String userMessage
     );
 
