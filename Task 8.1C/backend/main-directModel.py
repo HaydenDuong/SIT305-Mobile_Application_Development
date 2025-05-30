@@ -8,12 +8,12 @@ import os # For potentially using environment variables later
 app = Flask(__name__)
 
 # --- LLM Model and Tokenizer ---
-llm_model = None # Renamed from model to avoid conflict
+llm_model = None 
 tokenizer = None
-MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf" # Changed back for stability
+MODEL_NAME = "meta-llama/Llama-2-7b-chat-hf" 
+# MODEL_NAME = "meta-llama/Llama-3.2-1B" # Ensure this is the correct model name
 
 # --- Neo4j Connection Details ---
-# IMPORTANT: Replace with your actual AuraDB credentials
 NEO4J_URI = "neo4j+ssc://26c68983.databases.neo4j.io"
 NEO4J_USER = "neo4j"
 NEO4J_PASSWORD = "B0_uJk_ec2ISsyystlRcGpfqJlIHq3MgIs3OtCq1Tq8"
